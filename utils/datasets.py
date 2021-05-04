@@ -730,6 +730,8 @@ def load_mosaic(self, index):
 def load_mosaic9(self, index):
     # loads images in a 9-mosaic
 
+    hp, wp = None, None
+
     labels9, segments9 = [], []
     s = self.img_size
     indices = [index] + random.choices(self.indices, k=8)  # 8 additional image indices

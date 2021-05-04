@@ -2,18 +2,18 @@ import json
 import sys
 from pathlib import Path
 
-import torch
+# import torch
 import yaml
 from tqdm import tqdm
 
 sys.path.append(str(Path(__file__).parent.parent.parent))  # add utils/ to path
 from utils.datasets import LoadImagesAndLabels
 from utils.datasets import img2label_paths
-from utils.general import colorstr, xywh2xyxy, check_dataset
+from utils.general import colorstr, check_dataset  # , xywh2xyxy
 
 try:
     import wandb
-    from wandb import init, finish
+    from wandb import init, finish  # noqa: F401
 except ImportError:
     wandb = None
 
@@ -133,7 +133,7 @@ class WandbLogger():
                 config = self.wandb_run.config
                 opt.weights, opt.save_period, opt.batch_size, opt.bbox_interval, opt.epochs, opt.hyp = str(
                     self.weights), config.save_period, config.total_batch_size, config.bbox_interval, config.epochs, \
-                                                                                                       config.opt['hyp']
+                                                                                                       config.opt['hyp']  # noqa: E127
             data_dict = dict(self.wandb_run.config.data_dict)  # eliminates the need for config file to resume
         if 'val_artifact' not in self.__dict__:  # If --upload_dataset is set, use the existing artifact, don't download
             self.train_artifact_path, self.train_artifact = self.download_dataset_artifact(data_dict.get('train'),

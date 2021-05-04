@@ -11,6 +11,7 @@ def create_dataset_artifact(opt):
     with open(opt.data) as f:
         data = yaml.safe_load(f)  # data dict
     logger = WandbLogger(opt, '', None, data, job_type='Dataset Creation')
+    print(logger)
 
 
 if __name__ == '__main__':
