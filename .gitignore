@@ -19,6 +19,7 @@
 *.avi
 *.data
 *.json
+*.orig
 
 !assets/yolov3_640.png
 

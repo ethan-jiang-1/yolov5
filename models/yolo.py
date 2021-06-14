@@ -1,4 +1,8 @@
-# YOLOv5 YOLO-specific modules
+"""YOLOv5-specific modules
+
+Usage:
+    $ python path/to/models/yolo.py --cfg yolov5s.yaml
+"""
 
 import argparse
 import logging
@@ -6,8 +10,8 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 
-sys.path.append(Path(__file__).parent.parent.absolute().__str__())  # to run '$ python *.py' files in subdirectories
-logger = logging.getLogger(__name__)
+FILE = Path(__file__).absolute()
+sys.path.append(FILE.parents[1].as_posix())  # add yolov5/ to path
 
 from models.common import *
 from models.experimental import *
@@ -17,14 +21,16 @@ from utils.torch_utils import time_synchronized, fuse_conv_and_bn, model_info, s
     select_device, copy_attr
 
 try:
-    import thop  # for FLOPS computation
+    import thop  # for FLOPs computation
 except ImportError:
     thop = None
+
+logger = logging.getLogger(__name__)
 
 
 class Detect(nn.Module):
     stride = None  # strides computed during build
-    export = False  # onnx export
+    onnx_dynamic = False  # ONNX export parameter
 
     def __init__(self, nc=80, anchors=(), ch=(), inplace=True):  # detection layer
         super(Detect, self).__init__()
@@ -42,14 +48,13 @@ class Detect(nn.Module):
     def forward(self, x):
         # x = x.copy()  # for profiling
         z = []  # inference output
-        self.training |= self.export
         for i in range(self.nl):
             x[i] = self.m[i](x[i])  # conv
             bs, _, ny, nx = x[i].shape  # x(bs,255,20,20) to x(bs,3,20,20,85)
             x[i] = x[i].view(bs, self.na, self.no, ny, nx).permute(0, 1, 3, 4, 2).contiguous()
 
             if not self.training:  # inference
-                if self.grid[i].shape[2:4] != x[i].shape[2:4]:
+                if self.grid[i].shape[2:4] != x[i].shape[2:4] or self.onnx_dynamic:
                     self.grid[i] = self._make_grid(nx, ny).to(x[i].device)
 
                 y = x[i].sigmoid()
@@ -58,7 +63,7 @@ class Detect(nn.Module):
                     y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
                 else:  # for YOLOv5 on AWS Inferentia https://github.com/ultralytics/yolov5/pull/2953
                     xy = (y[..., 0:2] * 2. - 0.5 + self.grid[i]) * self.stride[i]  # xy
-                    wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
+                    wh = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i].view(1, self.na, 1, 1, 2)  # wh
                     y = torch.cat((xy, wh, y[..., 4:]), -1)
                 z.append(y.view(bs, -1, self.no))
 
@@ -137,13 +142,13 @@ class Model(nn.Module):
                 x = y[m.f] if isinstance(m.f, int) else [x if j == -1 else y[j] for j in m.f]  # from earlier layers
 
             if profile:
-                o = thop.profile(m, inputs=(x,), verbose=False)[0] / 1E9 * 2 if thop else 0  # FLOPS
+                o = thop.profile(m, inputs=(x,), verbose=False)[0] / 1E9 * 2 if thop else 0  # FLOPs
                 t = time_synchronized()
                 for _ in range(10):
                     _ = m(x)
                 dt.append((time_synchronized() - t) * 100)
                 if m == self.model[0]:
-                    logger.info(f"{'time (ms)':>10s} {'GFLOPS':>10s} {'params':>10s}  {'module'}")
+                    logger.info(f"{'time (ms)':>10s} {'GFLOPs':>10s} {'params':>10s}  {'module'}")
                 logger.info(f'{dt[-1]:10.2f} {o:10.2f} {m.np:10.0f}  {m.type}')
 
             x = m(x)  # run
@@ -216,9 +221,9 @@ class Model(nn.Module):
             self.model = self.model[:-1]  # remove
         return self
 
-    def autoshape(self):  # add autoShape module
-        logger.info('Adding autoShape... ')
-        m = autoShape(self)  # wrap model
+    def autoshape(self):  # add AutoShape module
+        logger.info('Adding AutoShape... ')
+        m = AutoShape(self)  # wrap model
         copy_attr(m, self, include=('yaml', 'nc', 'hyp', 'names', 'stride'), exclude=())  # copy attributes
         return m
 
