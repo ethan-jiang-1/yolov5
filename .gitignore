@@ -19,8 +19,9 @@
 *.avi
 *.data
 *.json
+*.orig
 
-!assets/yolov3_640.png
+saved_models
 
 *.cfg
 !cfg/yolov3*.cfg
