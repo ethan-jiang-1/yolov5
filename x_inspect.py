@@ -1,5 +1,5 @@
 from models.experimental import attempt_load
-from utils.torch_utils import select_device
+from utils.torch_utils import select_device, time_synchronized
 from utils.general import non_max_suppression, xyxy2xywh
 from utils.datasets import LoadImages
 from models.yolo import Model
@@ -23,6 +23,8 @@ class InspectModel(object):
 
             img_norm = cls.norm_img(img)
 
+            t1 = time_synchronized()
+            
             print("*pred_raw input shape", img_norm.shape)
             pred_raw = model(img_norm, augment=False)[0]
             print("*pred_raw output (len/shape):\t", "{}/{}".format(len(pred_raw), [pred_raw[i].shape for i in range(len(pred_raw))]))
@@ -35,6 +37,9 @@ class InspectModel(object):
             # pred = non_max_suppression(pred_raw, opt_conf_thres, opt_iou_thres, classes=opt_classes, agnostic=opt_agnostic_nms)
             pred = non_max_suppression(pred_raw)
             print("*pred -post NMS (len /shape):\t", "{}/{}".format(len(pred), [pred[i].shape for i in range(len(pred))]))
+
+            t2 = time_synchronized()
+            print("time gap for full pred/NMS", t2-t1, "\n")
 
             for _, det in enumerate(pred):
                 cls.output_detection(det, img, im0s, model)
