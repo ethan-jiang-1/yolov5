@@ -21,6 +21,8 @@
 *.json
 *.orig
 
+!assets/*.png
+
 saved_models
 
 *.cfg
