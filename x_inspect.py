@@ -24,7 +24,7 @@ class InspectModel(object):
             img_norm = cls.norm_img(img)
 
             t1 = time_synchronized()
-            
+
             print("*pred_raw input shape", img_norm.shape)
             pred_raw = model(img_norm, augment=False)[0]
             print("*pred_raw output (len/shape):\t", "{}/{}".format(len(pred_raw), [pred_raw[i].shape for i in range(len(pred_raw))]))
@@ -39,7 +39,7 @@ class InspectModel(object):
             print("*pred -post NMS (len /shape):\t", "{}/{}".format(len(pred), [pred[i].shape for i in range(len(pred))]))
 
             t2 = time_synchronized()
-            print("time gap for full pred/NMS", t2-t1, "\n")
+            print("time gap for full pred/NMS", t2 - t1, "\n")
 
             for _, det in enumerate(pred):
                 cls.output_detection(det, img, im0s, model)
