@@ -90,7 +90,8 @@ def plot_one_box_PIL(box, im, color=(128, 128, 128), label=None, line_thickness=
         draw.rectangle(box, width=line_thickness, outline=color)  # plot
         if label:
             #font = ImageFont.truetype("Arial.ttf", size=max(round(max(im.size) / 40), 12))
-            font = ImageFont.truetype(font="ukai.ttc", size=12)
+            font = ImageFont.truetype(font="wqy-zenhei.ttc", size=24)
+            #font = ImageFont.truetype(font="ukai.ttc", size=12)
             txt_width, txt_height = font.getsize(label)
             draw.rectangle([box[0], box[1] - txt_height + 4, box[0] + txt_width, box[1]], fill=color)
             draw.text((box[0], box[1] - txt_height + 1), label, fill=(255, 255, 255), font=font)
