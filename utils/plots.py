@@ -93,8 +93,9 @@ def plot_one_box_PIL(box, im, color=(128, 128, 128), label=None, line_thickness=
             font = ImageFont.truetype(font="wqy-zenhei.ttc", size=24)
             #font = ImageFont.truetype(font="ukai.ttc", size=12)
             txt_width, txt_height = font.getsize(label)
+            txt_width, txt_height = 100, 30
             draw.rectangle([box[0], box[1] - txt_height + 4, box[0] + txt_width, box[1]], fill=color)
-            draw.text((box[0], box[1] - txt_height + 1), label, fill=(255, 255, 255), font=font)
+            #draw.text((box[0], box[1] - txt_height + 1), label, fill=(255, 255, 255), font=font)
     except Exception as ex:
         print("Exception occured", ex)
     return np.asarray(im)
