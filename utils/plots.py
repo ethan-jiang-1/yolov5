@@ -82,6 +82,8 @@ def plot_one_box(x, im, color=(128, 128, 128), label=None, line_thickness=3):
 
 
 def plot_one_box_PIL(box, im, color=(128, 128, 128), label=None, line_thickness=None):
+    return plot_one_box(box, im, color=color, label=label, line_thickness=line_thickness)
+'''
     # Plots one bounding box on image 'im' using PIL
     try:
         im = Image.fromarray(im)
@@ -99,7 +101,7 @@ def plot_one_box_PIL(box, im, color=(128, 128, 128), label=None, line_thickness=
     except Exception as ex:
         print("Exception occured", ex)
     return np.asarray(im)
-
+'''
 
 def plot_wh_methods():  # from utils.plots import *; plot_wh_methods()
     # Compares the two methods for width-height anchor multiplication
