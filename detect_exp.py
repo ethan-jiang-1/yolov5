@@ -15,7 +15,7 @@ from pathlib import Path
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
-import math
+#import math
 
 FILE = Path(__file__).absolute()
 sys.path.append(FILE.parents[0].as_posix())  # add yolov5/ to path
@@ -33,8 +33,8 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
 
     label = names[c] 
     print(xyxy, label, conf)
-    dx = math.abs(xyxy[0], xyxy[2])
-    dy = math.abs(xyxy[1], xyxy[3])
+    dx = abs(xyxy[0], xyxy[2])
+    dy = abs(xyxy[1], xyxy[3])
 
     if dx < 20 or dy < 20:
         label = None
