@@ -33,19 +33,20 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
 
     label = names[c] 
     print(xyxy, label, conf)
+
     dx = abs(xyxy[0] - xyxy[2])
     dy = abs(xyxy[1] - xyxy[3])
-
     if dx < 48 or dy < 48:
         label = None
 
-    names = label.split("-")
-    if len(names) == 2:
-        label = names[1]
-    if label.find("BK0") != -1:
-        label = None
-    elif label.find("hand") != -1:
-        label = None
+    if label is not None:
+        names = label.split("-")
+        if len(names) == 2:
+            label = names[1]
+        if label.find("BK0") != -1:
+            label = None
+        elif label.find("hand") != -1:
+            label = None
 
     if label is not None:
         plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
