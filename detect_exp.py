@@ -41,8 +41,8 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
     if label is not None:
         if label.find("BK0") != -1:
             label = None
-        elif label.find("hand") != -1:
-            label = None
+        #elif label.find("hand") != -1:
+        #    label = None
 
     if label is not None:
         plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
