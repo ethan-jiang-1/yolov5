@@ -33,8 +33,8 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
 
     label = names[c] 
     print(xyxy, label, conf)
-    dx = abs(xyxy[0], xyxy[2])
-    dy = abs(xyxy[1], xyxy[3])
+    dx = abs(xyxy[0] - xyxy[2])
+    dy = abs(xyxy[1] - xyxy[3])
 
     if dx < 20 or dy < 20:
         label = None
