@@ -32,7 +32,6 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
     #label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
 
     label = names[c] 
-    print(xyxy, label, conf)
 
     dx = abs(xyxy[0] - xyxy[2])
     dy = abs(xyxy[1] - xyxy[3])
@@ -47,6 +46,9 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
 
     if label is not None:
         plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
+    else:
+        print("ignored", label, conf, xyxy)
+
 
 
 @torch.no_grad()
