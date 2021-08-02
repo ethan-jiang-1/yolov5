@@ -53,6 +53,11 @@ def has_stop_signal_received():
         return True
     return False
 
+def has_inc_signal_received():
+    if InterruptSignal.get_received_signal() == signal.SIGUSR2:
+        print("Inc Loop: received interrupt signal", InterruptSignal.get_received_signal())
+        return True
+    return False
 
 LOGGER = logging.getLogger(__name__)
 LOCAL_RANK = int(os.getenv('LOCAL_RANK', -1))  # https://pytorch.org/docs/stable/elastic/run.html
@@ -404,6 +409,10 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         #ethan add
         if has_stop_signal_received():
             break
+        if has_inc_signal_received():
+            InterruptSignal.reset_kill_signal()
+            if epoch > 50 + 10:
+                epoch -= 50
 
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training -----------------------------------------------------------------------------------------------------
