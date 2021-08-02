@@ -24,7 +24,8 @@ class InterruptSignal(object):
         print("  kill -n {} {}".format(signal.SIGUSR1, pid)) 
         print()
         print("To Save Training:")
-        print("  kill -n {} {}".format(signal.SIGUSR2, pid)) 
+        print("  kill -n {} {}".format(signal.SIGUSR2, pid))
+        print() 
 
 
 def receive_signal_user(signum, stack):

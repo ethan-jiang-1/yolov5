@@ -404,6 +404,10 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                     torch.save(ckpt, best)
                 del ckpt
                 callbacks.on_model_save(last, epoch, final_epoch, best_fitness, fi)
+            
+        #ethan add
+        if has_stop_signal_received():
+            break
 
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training -----------------------------------------------------------------------------------------------------
