@@ -67,6 +67,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
           ):
     #ethan add
     InterruptSignal.reset_kill_signal()
+    InterruptSignal.prompt_kill_signal()
 
     save_dir, epochs, batch_size, weights, single_cls, evolve, data, cfg, resume, noval, nosave, workers, freeze, = \
         Path(opt.save_dir), opt.epochs, opt.batch_size, opt.weights, opt.single_cls, opt.evolve, opt.data, opt.cfg, \
