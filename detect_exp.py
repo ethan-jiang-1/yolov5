@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Run inference with a YOLOv5 model on images, videos, directories, streams
 
 Usage:
@@ -15,7 +12,6 @@ from pathlib import Path
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
-#import math
 
 FILE = Path(__file__).absolute()
 sys.path.append(FILE.parents[0].as_posix())  # add yolov5/ to path
@@ -26,6 +22,7 @@ from utils.general import check_img_size, check_requirements, check_imshow, colo
     apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, save_one_box
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_sync
+
 
 def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness):
     c = int(cls)  # integer class
@@ -48,8 +45,6 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
         plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
     else:
         print("ignored", label, conf, xyxy)
-
-
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
@@ -91,18 +86,23 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
     half &= device.type != 'cpu'  # half precision only supported on CUDA
 
     # Load model
-    model = attempt_load(weights, map_location=device)  # load FP32 model
-    stride = int(model.stride.max())  # model stride
+    w = weights[0] if isinstance(weights, list) else weights
+    classify, pt, onnx = False, w.endswith('.pt'), w.endswith('.onnx')  # inference type
+    stride, names = 64, [f'class{i}' for i in range(1000)]  # assign defaults
+    if pt:
+        model = attempt_load(weights, map_location=device)  # load FP32 model
+        stride = int(model.stride.max())  # model stride
+        names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+        if half:
+            model.half()  # to FP16
+        if classify:  # second-stage classifier
+            modelc = load_classifier(name='resnet50', n=2)  # initialize
+            modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+    elif onnx:
+        check_requirements(('onnx', 'onnxruntime'))
+        import onnxruntime
+        session = onnxruntime.InferenceSession(w, None)
     imgsz = check_img_size(imgsz, s=stride)  # check image size
-    names = model.module.names if hasattr(model, 'module') else model.names  # get class names
-    if half:
-        model.half()  # to FP16
-
-    # Second-stage classifier
-    classify = False
-    if classify:
-        modelc = load_classifier(name='resnet50', n=2)  # initialize
-        modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
 
     # Dataloader
     if webcam:
@@ -116,31 +116,36 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
     vid_path, vid_writer = [None] * bs, [None] * bs
 
     # Run inference
-    if device.type != 'cpu':
+    if pt and device.type != 'cpu':
         model(torch.zeros(1, 3, imgsz, imgsz).to(device).type_as(next(model.parameters())))  # run once
     t0 = time.time()
     for path, img, im0s, vid_cap in dataset:
-        img = torch.from_numpy(img).to(device)
-        img = img.half() if half else img.float()  # uint8 to fp16/32
+        if pt:
+            img = torch.from_numpy(img).to(device)
+            img = img.half() if half else img.float()  # uint8 to fp16/32
+        elif onnx:
+            img = img.astype('float32')
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
-        if img.ndimension() == 3:
-            img = img.unsqueeze(0)
+        if len(img.shape) == 3:
+            img = img[None]  # expand for batch dim
 
         # Inference
         t1 = time_sync()
-        pred = model(img,
-                     augment=augment,
-                     visualize=increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False)[0]
+        if pt:
+            visualize = increment_path(save_dir / Path(path).stem, mkdir=True) if visualize else False
+            pred = model(img, augment=augment, visualize=visualize)[0]
+        elif onnx:
+            pred = torch.tensor(session.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: img}))
 
-        # Apply NMS
+        # NMS
         pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
         t2 = time_sync()
 
-        # Apply Classifier
+        # Second-stage classifier (optional)
         if classify:
             pred = apply_classifier(pred, modelc, img, im0s)
 
-        # Process detections
+        # Process predictions
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1
                 p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
@@ -171,10 +176,9 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
                             f.write(('%g ' * len(line)).rstrip() % line + '\n')
 
                     if save_img or save_crop or view_img:  # Add bbox to image
-                        #c = int(cls)  # integer class
+                        c = int(cls)  # integer class
                         #label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                         #plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
-                        #plot_one_box_PIL(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
                         plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness)
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
