@@ -47,7 +47,7 @@ from utils.loggers import Loggers
 from utils.callbacks import Callbacks
 
 #ethan add
-from xt_exp import InterruptSignal, signal
+from utils_exp.ue_interrupt_signal import InterruptSignal, signal
 
 def has_stop_signal_received():
     if InterruptSignal.get_received_signal() == signal.SIGUSR1:
@@ -55,9 +55,9 @@ def has_stop_signal_received():
         return True
     return False
 
-def has_inc_signal_received():
+def has_save_signal_received():
     if InterruptSignal.get_received_signal() == signal.SIGUSR2:
-        print("Inc Loop: received interrupt signal", InterruptSignal.get_received_signal())
+        print("Save model: received interrupt signal", InterruptSignal.get_received_signal())
         return True
     return False
 
@@ -391,8 +391,14 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                 best_fitness = fi
             callbacks.on_fit_epoch_end(mloss, results, lr, epoch, best_fitness, fi)
 
+            #ethan add
+            save_model_signal = False
+            if has_save_signal_received():
+                InterruptSignal.reset_kill_signal()
+                save_model_signal = True
+
             # Save model
-            if (not nosave) or (final_epoch and not evolve):  # if save
+            if (not nosave) or (final_epoch and not evolve) or (save_model_signal and not evolve):  # if save
                 ckpt = {'epoch': epoch,
                         'best_fitness': best_fitness,
                         'model': deepcopy(de_parallel(model)).half(),
@@ -411,10 +417,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         #ethan add
         if has_stop_signal_received():
             break
-        if has_inc_signal_received():
-            InterruptSignal.reset_kill_signal()
-            if epoch > 50 + 10:
-                epoch -= 50
+
 
         # end epoch ----------------------------------------------------------------------------------------------------
     # end training -----------------------------------------------------------------------------------------------------
