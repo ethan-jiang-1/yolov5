@@ -27,7 +27,9 @@ from tqdm import tqdm
 FILE = Path(__file__).absolute()
 sys.path.append(FILE.parents[0].as_posix())  # add yolov5/ to path
 
-import val  # for end-of-epoch mAP
+#ethan
+#import val  # for end-of-epoch mAP
+import val_exp as val
 from models.experimental import attempt_load
 from models.yolo import Model
 from utils.autoanchor import check_anchors
