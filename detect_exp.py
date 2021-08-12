@@ -23,7 +23,7 @@ from utils.general import check_img_size, check_requirements, check_imshow, colo
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_sync
 
-#ethan add
+#ethan add 1
 def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness):
     c = int(cls)  # integer class
     #label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
@@ -45,6 +45,7 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
         plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
     else:
         print("ignored", label, conf, xyxy)
+
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
@@ -177,7 +178,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
-                        #ethan add
+
+                        #ethan add / modify 2
                         #label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
                         #plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)
                         plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness)
@@ -214,7 +216,7 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        print(f"Results saved to {save_dir}{s}")
+        print(f"Results saved to {colorstr('bold', save_dir)}{s}")
 
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
