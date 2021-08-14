@@ -26,7 +26,7 @@ from utils.torch_utils import select_device, load_classifier, time_sync
 #ethan add 1
 def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness):
     c = int(cls)  # integer class
-    #label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
+    label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
 
     label = names[c] 
 
@@ -41,8 +41,8 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
         #elif label.find("hand") != -1:
         #    label = None
 
-        if label.find("HBU0") != -1:
-            label = label.replace("HBU0", "")
+        if label.find("HBU") != -1:
+            label = label.replace("HBU", "")
 
     if label is not None:
         plot_one_box(xyxy, im0, label=label, color=colors(c, True), line_thickness=line_thickness)

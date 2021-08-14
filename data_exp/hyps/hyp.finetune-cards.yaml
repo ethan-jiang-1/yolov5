@@ -27,11 +27,11 @@ fl_gamma: 0.0
 hsv_h: 0.0138
 hsv_s: 0.664
 hsv_v: 0.464
-degrees: 0.373
+degrees: 15.0 #0.373
 translate: 0.245
 scale: 0.898
 shear: 0.602
-perspective: 0.0002
+perspective: 0.0002 #0.0
 flipud: 0.00856
 fliplr: 0.5
 mosaic: 1.0
