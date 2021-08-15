@@ -20,7 +20,7 @@ class InterruptSignal(object):
         print()
         print('#m# start PID: {}, run following'.format(pid))
         print("")
-        print("To Stop Training:")
+        print("To Stop Training and exit:")
         print("  kill -n {} {}".format(signal.SIGUSR1, pid)) 
         print()
         print("To Save Model and exit:")
