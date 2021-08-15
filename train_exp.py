@@ -364,11 +364,17 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         lr = [x['lr'] for x in optimizer.param_groups]  # for loggers
         scheduler.step()
 
+        #ethan add/modify 3
+        if has_save_signal_received():
+            InterruptSignal.reset_kill_signal()
+            epoch = epochs - 1
+
         if RANK in [-1, 0]:
             # mAP
             callbacks.on_train_epoch_end(epoch=epoch)
             ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'names', 'stride', 'class_weights'])
             final_epoch = epoch + 1 == epochs
+
             if not noval or final_epoch:  # Calculate mAP
                 results, maps, _ = val.run(data_dict,
                                            batch_size=batch_size // WORLD_SIZE * 2,
@@ -389,13 +395,6 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                 best_fitness = fi
             log_vals = list(mloss) + list(results) + lr
             callbacks.on_fit_epoch_end(log_vals, epoch, best_fitness, fi)
-
-
-            #ethan add/modify 3
-            save_model_signal = False
-            if has_save_signal_received():
-                InterruptSignal.reset_kill_signal()
-                save_model_signal = True
 
             # Save model
             if (not nosave) or (final_epoch and not evolve) or (save_model_signal or not evolve):  # if save

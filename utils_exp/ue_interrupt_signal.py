@@ -23,7 +23,7 @@ class InterruptSignal(object):
         print("To Stop Training:")
         print("  kill -n {} {}".format(signal.SIGUSR1, pid)) 
         print()
-        print("To Save Model:")
+        print("To Save Model and exit:")
         print("  kill -n {} {}".format(signal.SIGUSR2, pid))
         print() 
 
