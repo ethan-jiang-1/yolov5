@@ -27,8 +27,7 @@ from utils.torch_utils import select_device, load_classifier, time_sync
 def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness):
     c = int(cls)  # integer class
     label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
-
-    label = names[c] 
+    #label = names[c] 
 
     dx = abs(xyxy[0] - xyxy[2])
     dy = abs(xyxy[1] - xyxy[3])
@@ -38,10 +37,9 @@ def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_th
     if label is not None:
         if label.find("BK0") != -1:
             label = None
-        #elif label.find("hand") != -1:
-        #    label = None
-
-        if label.find("HBU") != -1:
+        elif label.find("hand") != -1:
+            label = None
+        elif label.find("HBU") != -1:
             label = label.replace("HBU", "")
 
     if label is not None:
