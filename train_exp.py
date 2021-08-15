@@ -367,6 +367,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         #ethan add/modify 3
         if has_save_signal_received():
             InterruptSignal.reset_kill_signal()
+            print("change epoch from {} to {} ".format(epoch, epochs-1))
             epoch = epochs - 1
 
         if RANK in [-1, 0]:
