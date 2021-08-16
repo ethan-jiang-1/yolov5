@@ -28,6 +28,9 @@ from utils.torch_utils import select_device, time_sync
 from utils.callbacks import Callbacks
 
 
+#ethan add 0
+from utils.general_exp import non_max_suppression
+
 def save_one_txt(predn, save_conf, shape, file):
     # Save one txt result
     gn = torch.tensor(shape)[[1, 0, 1, 0]]  # normalization gain whwh

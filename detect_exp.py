@@ -23,6 +23,9 @@ from utils.general import check_img_size, check_requirements, check_imshow, colo
 from utils.plots import colors, plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_sync
 
+#ethan add 0
+from utils.general_exp import non_max_suppression
+
 #ethan add 1
 def plot_one_box_ex(xyxy, im0, cls, hide_labels, names, hide_conf, conf, line_thickness):
     c = int(cls)  # integer class
