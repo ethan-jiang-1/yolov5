@@ -143,7 +143,7 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
             pred = torch.tensor(session.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: img}))
 
         # NMS
-        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det, multi_label=True)
         t2 = time_sync()
 
         # Second-stage classifier (optional)
