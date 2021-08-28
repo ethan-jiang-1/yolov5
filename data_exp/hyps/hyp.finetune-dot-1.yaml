@@ -8,10 +8,10 @@
 #                   P         R     mAP.5 mAP.5:.95       box       obj       cls
 # Metrics:        0.6     0.936     0.896     0.684    0.0115   0.00805   0.00146
 
-lr0: 0.0016 #0.0032 
-lrf: 0.06 #0.12
-momentum: 0.411 #0.843
-weight_decay: 0.00036
+lr0: 0.016 # 0.0032
+lrf: 0.06 # 0.12
+momentum: 0.771 # 0.843
+weight_decay: 0.00018 # 0.00036
 warmup_epochs: 2.0
 warmup_momentum: 0.5
 warmup_bias_lr: 0.05
@@ -27,11 +27,11 @@ fl_gamma: 0.0
 hsv_h: 0.0138
 hsv_s: 0.664
 hsv_v: 0.464
-degrees: 30.0 #15.0 #0.373
+degrees: 0.373
 translate: 0.245
 scale: 0.898
 shear: 0.602
-perspective: 0.0002 #0.0
+perspective: 0.001 # 0.0
 flipud: 0.00856
 fliplr: 0.5
 mosaic: 1.0
