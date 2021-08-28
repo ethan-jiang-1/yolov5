@@ -12,9 +12,9 @@ lr0: 0.004 #0.008 # 0.016 # 0.0032
 lrf: 0.002 # 0.03 # 0.06 # 0.12
 momentum: 0.66 # 0.69 # 0.771 # 0.843
 weight_decay: 0.0012 # 0.00014 # 0.00018 # 0.00036
-warmup_epochs: 2.0
-warmup_momentum: 0.5
-warmup_bias_lr: 0.05
+warmup_epochs: 1.0 # 2.0
+warmup_momentum: 0.06 # 0.125 # 0.25 # 0.5
+warmup_bias_lr: 0.006 # 0.0125 # 0.025 # 0.05
 box: 0.0296
 cls: 0.243
 cls_pw: 0.631
