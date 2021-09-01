@@ -1,4 +1,6 @@
-"""Validate a trained YOLOv5 model accuracy on a custom dataset
+# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
+"""
+Validate a trained YOLOv5 model accuracy on a custom dataset
 
 Usage:
     $ python path/to/val.py --data coco128.yaml --weights yolov5s.pt --img 640
@@ -27,9 +29,6 @@ from utils.plots import plot_images, output_to_target, plot_study_txt
 from utils.torch_utils import select_device, time_sync
 from utils.callbacks import Callbacks
 
-
-#ethan add 0
-from utils.general_exp import non_max_suppression
 
 def save_one_txt(predn, save_conf, shape, file):
     # Save one txt result
@@ -220,9 +219,7 @@ def run(data,
             callbacks.on_val_image_end(pred, predn, path, names, img[si])
 
         # Plot images
-        #ethan modify 1
-        #if plots and batch_i < 3:
-        if plots and batch_i < 5:
+        if plots and batch_i < 3:
             f = save_dir / f'val_batch{batch_i}_labels.jpg'  # labels
             Thread(target=plot_images, args=(img, targets, paths, f, names), daemon=True).start()
             f = save_dir / f'val_batch{batch_i}_pred.jpg'  # predictions

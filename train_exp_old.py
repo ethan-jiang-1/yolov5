@@ -1,6 +1,4 @@
-# YOLOv5 🚀 by Ultralytics, GPL-3.0 license
-"""
-Train a YOLOv5 model on a custom dataset
+"""Train a YOLOv5 model on a custom dataset
 
 Usage:
     $ python path/to/train.py --data coco128.yaml --weights yolov5s.pt --img 640
@@ -8,7 +6,6 @@ Usage:
 
 import argparse
 import logging
-import math
 import os
 import random
 import sys
@@ -16,6 +13,7 @@ import time
 from copy import deepcopy
 from pathlib import Path
 
+import math
 import numpy as np
 import torch
 import torch.distributed as dist
@@ -40,8 +38,7 @@ from utils.general import labels_to_class_weights, increment_path, labels_to_ima
 from utils.downloads import attempt_download
 from utils.loss import ComputeLoss
 from utils.plots import plot_labels, plot_evolve
-from utils.torch_utils import EarlyStopping, ModelEMA, de_parallel, intersect_dicts, select_device, \
-    torch_distributed_zero_first
+from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first, de_parallel
 from utils.loggers.wandb.wandb_utils import check_wandb_resume
 from utils.metrics import fitness
 from utils.loggers import Loggers
@@ -74,7 +71,6 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
           device,
           callbacks=Callbacks()
           ):
-
     #ethan add 2
     InterruptSignal.reset_kill_signal()
     InterruptSignal.prompt_kill_signal()
@@ -277,22 +273,29 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
     results = (0, 0, 0, 0, 0, 0, 0)  # P, R, mAP@.5, mAP@.5-.95, val_loss(box, obj, cls)
     scheduler.last_epoch = start_epoch - 1  # do not move
     scaler = amp.GradScaler(enabled=cuda)
-    stopper = EarlyStopping(patience=opt.patience)
     compute_loss = ComputeLoss(model)  # init loss class
     LOGGER.info(f'Image sizes {imgsz} train, {imgsz} val\n'
                 f'Using {train_loader.num_workers} dataloader workers\n'
-                f"Logging results to {colorstr('bold', save_dir)}\n"
+                f'Logging results to {save_dir}\n'
                 f'Starting training for {epochs} epochs...')
     for epoch in range(start_epoch, epochs):  # epoch ------------------------------------------------------------------
         model.train()
 
-        # Update image weights (optional, single-GPU only)
+        # Update image weights (optional)
         if opt.image_weights:
-            cw = model.class_weights.cpu().numpy() * (1 - maps) ** 2 / nc  # class weights
-            iw = labels_to_image_weights(dataset.labels, nc=nc, class_weights=cw)  # image weights
-            dataset.indices = random.choices(range(dataset.n), weights=iw, k=dataset.n)  # rand weighted idx
+            # Generate indices
+            if RANK in [-1, 0]:
+                cw = model.class_weights.cpu().numpy() * (1 - maps) ** 2 / nc  # class weights
+                iw = labels_to_image_weights(dataset.labels, nc=nc, class_weights=cw)  # image weights
+                dataset.indices = random.choices(range(dataset.n), weights=iw, k=dataset.n)  # rand weighted idx
+            # Broadcast if DDP
+            if RANK != -1:
+                indices = (torch.tensor(dataset.indices) if RANK == 0 else torch.zeros(dataset.n)).int()
+                dist.broadcast(indices, 0)
+                if RANK != 0:
+                    dataset.indices = indices.cpu().numpy()
 
-        # Update mosaic border (optional)
+        # Update mosaic border
         # b = int(random.uniform(0.25 * imgsz, 0.75 * imgsz + gs) // gs * gs)
         # dataset.mosaic_border = [b - imgsz, -b]  # height, width borders
 
@@ -354,7 +357,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                 mem = f'{torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0:.3g}G'  # (GB)
                 pbar.set_description(('%10s' * 2 + '%10.4g' * 5) % (
                     f'{epoch}/{epochs - 1}', mem, *mloss, targets.shape[0], imgs.shape[-1]))
-                callbacks.on_train_batch_end(ni, model, imgs, targets, paths, plots, opt.sync_bn)
+                callbacks.on_train_batch_end(ni, model, imgs, targets, paths, plots)
             # end batch ------------------------------------------------------------------------------------------------
 
         # Scheduler
@@ -372,6 +375,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
             callbacks.on_train_epoch_end(epoch=epoch)
             ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'names', 'stride', 'class_weights'])
             final_epoch = epoch + 1 == epochs
+
             if not noval or final_epoch:  # Calculate mAP
                 results, maps, _ = val.run(data_dict,
                                            batch_size=batch_size // WORLD_SIZE * 2,
@@ -409,20 +413,6 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                     torch.save(ckpt, best)
                 del ckpt
                 callbacks.on_model_save(last, epoch, final_epoch, best_fitness, fi)
-
-            # Stop Single-GPU
-            if stopper(epoch=epoch, fitness=fi):
-                break
-
-            # Stop DDP TODO: known issues shttps://github.com/ultralytics/yolov5/pull/4576
-            # stop = stopper(epoch=epoch, fitness=fi)
-            # if RANK == 0:
-            #    dist.broadcast_object_list([stop], 0)  # broadcast 'stop' to all ranks
-
-        # Stop DPP
-        # with torch_distributed_zero_first(RANK):
-        # if stop:
-        #    break  # must break all DDP ranks
 
         #ethan add 4
         if has_stop_signal_received():
@@ -493,7 +483,6 @@ def parse_opt(known=False):
     parser.add_argument('--artifact_alias', type=str, default="latest", help='version of dataset artifact to be used')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     parser.add_argument('--freeze', type=int, default=0, help='Number of layers to freeze. backbone=10, all=24')
-    parser.add_argument('--patience', type=int, default=30, help='EarlyStopping patience (epochs)')
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
     return opt
 
@@ -530,9 +519,10 @@ def main(opt):
         assert opt.batch_size % WORLD_SIZE == 0, '--batch-size must be multiple of CUDA device count'
         assert not opt.image_weights, '--image-weights argument is not compatible with DDP training'
         assert not opt.evolve, '--evolve argument is not compatible with DDP training'
+        assert not opt.sync_bn, '--sync-bn known training issue, see https://github.com/ultralytics/yolov5/issues/3998'
         torch.cuda.set_device(LOCAL_RANK)
         device = torch.device('cuda', LOCAL_RANK)
-        dist.init_process_group(backend="nccl" if dist.is_nccl_available() else "gloo")
+        dist.init_process_group(backend="nccl" if dist.is_nccl_available() else "gloo", timeout=timedelta(seconds=60))
 
     # Train
     if not opt.evolve:
