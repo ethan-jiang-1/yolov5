@@ -31,9 +31,9 @@ degrees: 0.373
 translate: 0.245
 scale: 0.898
 shear: 0.602
-perspective: 0.001 # 0.0
+perspective: 0.0
 flipud: 0.00856
 fliplr: 0.5
-mosaic: 1.0
-mixup: 0.243
+mosaic: 0.0 # 1.0
+mixup: 0.0 # 0.243
 copy_paste: 0.0
