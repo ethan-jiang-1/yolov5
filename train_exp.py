@@ -114,7 +114,9 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
             callbacks.register_action(k, callback=getattr(loggers, k))
 
     # Config
-    plots = not evolve  # create plots
+    #ethan modify 3
+    #plots = not evolve  # create plots
+    plots = False
     cuda = device.type != 'cpu'
     init_seeds(1 + RANK)
     with torch_distributed_zero_first(RANK):
@@ -361,7 +363,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         lr = [x['lr'] for x in optimizer.param_groups]  # for loggers
         scheduler.step()
 
-        #ethan add/modify 3
+        #ethan add/modify 4
         if has_save_signal_received():
             InterruptSignal.reset_kill_signal()
             print("change epoch from {} to {} ".format(epoch, epochs-1))
@@ -424,7 +426,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         # if stop:
         #    break  # must break all DDP ranks
 
-        #ethan add 4
+        #ethan add 5
         if has_stop_signal_received():
             break
 
@@ -525,7 +527,7 @@ def main(opt):
     # DDP mode
     device = select_device(opt.device, batch_size=opt.batch_size)
     if LOCAL_RANK != -1:
-        from datetime import timedelta
+        #from datetime import timedelta
         assert torch.cuda.device_count() > LOCAL_RANK, 'insufficient CUDA devices for DDP command'
         assert opt.batch_size % WORLD_SIZE == 0, '--batch-size must be multiple of CUDA device count'
         assert not opt.image_weights, '--image-weights argument is not compatible with DDP training'
