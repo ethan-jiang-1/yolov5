@@ -22,33 +22,12 @@ sys.path.append(FILE.parents[0].as_posix())  # add yolov5/ to path
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, check_requirements, check_imshow, colorstr, is_ascii, non_max_suppression, \
-    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, save_one_box
+    apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, save_one_box  # noqa
 from utils.plots import Annotator, colors
 from utils.torch_utils import select_device, load_classifier, time_sync
 
 #ethan add 1
-#from utils.general import non_max_suppression
-#from utils.general_exp import non_max_suppression
-
-#ethan add 2
-def annotator_box_label_exp(annotator, xyxy, label, color=None):
-    dx = abs(xyxy[0] - xyxy[2])
-    dy = abs(xyxy[1] - xyxy[3])
-    if dx < 48 or dy < 48:
-        label = None
-
-    if label is not None:
-        if label.find("BK0") != -1:
-            label = None
-        elif label.find("hand") != -1:
-            label = None
-        elif label.find("HBU") != -1:
-            label = label.replace("HBU", "")
-
-    if label is not None:
-        annotator.box_label(xyxy, label, color)
-    else:
-        print("ignored by annotator_box_label_exp", label, xyxy)
+from utils.general_exp import apply_classifier_exp, load_classifier_exp, annotator_box_label_exp, ENABLE_CLASSIFER
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
@@ -91,7 +70,12 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
     # Load model
     w = weights[0] if isinstance(weights, list) else weights
+
+    # ethan add/modify 2
     classify, suffix = False, Path(w).suffix.lower()
+    if ENABLE_CLASSIFER:
+        classify, suffix = True, Path(w).suffix.lower()
+    
     pt, onnx, tflite, pb, saved_model = (suffix == x for x in ['.pt', '.onnx', '.tflite', '.pb', ''])  # backend
     stride, names = 64, [f'class{i}' for i in range(1000)]  # assign defaults
     if pt:
@@ -101,8 +85,10 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
         if half:
             model.half()  # to FP16
         if classify:  # second-stage classifier
-            modelc = load_classifier(name='resnet50', n=2)  # initialize
-            modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+            # ethan add/modify 3: 
+            #modelc = load_classifier(name='resnet50', n=2)  # initialize
+            #modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+            modelc = load_classifier_exp(device)
     elif onnx:
         check_requirements(('onnx', 'onnxruntime'))
         import onnxruntime
@@ -190,7 +176,9 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
         # Second-stage classifier (optional)
         if classify:
-            pred = apply_classifier(pred, modelc, img, im0s)
+            #ethan 4: 
+            # pred = apply_classifier(pred, modelc, img, im0s)
+            pred = apply_classifier_exp(pred, modelc, img, im0s)
 
         # Process predictions
         for i, det in enumerate(pred):  # detections per image
@@ -228,7 +216,7 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
 
-                        #ethan add / modify 3
+                        #ethan add / modify 5
                         #annotator.box_label(xyxy, label, color=colors(c, True))
                         annotator_box_label_exp(annotator, xyxy, label, color=colors(c, True))
 
