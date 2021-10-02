@@ -22,7 +22,7 @@ def has_classifier_enabled():
     return ENABLE_CLASSIFER
 
 
-def _load_classifier(name='resnet101', n=2):
+def _load_classifier(name='resnet50', n=2):
     if not ENABLE_CLASSIFER:
         return None
 
@@ -48,9 +48,13 @@ def load_classifier_exp(device):
     if not ENABLE_CLASSIFER:
         return None
 
-    modelc = _load_classifier(name='resnet50', n=2)  # initialize
-    modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
-    return modelc
+    try:
+        modelc = _load_classifier(name='resnet50', n=2)  # initialize
+        modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+        return modelc
+    except Exception as ex:
+        print("Exception occured", ex)
+        return None
 
 
 def apply_classifier_exp(x, model, img, im0):
