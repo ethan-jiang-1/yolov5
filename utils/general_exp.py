@@ -8,7 +8,8 @@ from utils.general import xyxy2xywh, xywh2xyxy, scale_coords
 
 
 ENABLE_CLASSIFER = False
-ENABLE_DUMP_CROP_IMGS = True
+ENABLE_DUMP_CROP_IMGS = False
+ENABLE_DUMP_CROP_LOG = False
 s_classifiy_cnt = -1
 
 
@@ -17,6 +18,11 @@ def enable_classifier(enable_disable):
     ENABLE_CLASSIFER = enable_disable
     print("ENABLE_CLASSIFER", ENABLE_CLASSIFER)
     return ENABLE_CLASSIFER
+
+def enable_dump_corp_imgs(enable_disable):
+    global ENABLE_DUMP_CROP_IMGS
+    ENABLE_DUMP_CROP_IMGS = enable_disable
+    return ENABLE_DUMP_CROP_IMGS
 
 def has_classifier_enabled():
     return ENABLE_CLASSIFER
@@ -97,6 +103,7 @@ def apply_classifier_exp(x, model, img, im0):
                 x[i] = x[i][pred_cls1 == pred_cls2]  # retain matching class detections
 
     return x
+
 
 def annotator_box_label_exp(annotator, xyxy, label, color=None):
     dx = abs(xyxy[0] - xyxy[2])
