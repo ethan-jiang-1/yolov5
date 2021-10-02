@@ -22,6 +22,7 @@ def enable_classifier(enable_disable):
 def enable_dump_corp_imgs(enable_disable):
     global ENABLE_DUMP_CROP_IMGS
     ENABLE_DUMP_CROP_IMGS = enable_disable
+    print("ENABLE_DUMP_CROP_IMGS", ENABLE_DUMP_CROP_IMGS)
     return ENABLE_DUMP_CROP_IMGS
 
 def has_classifier_enabled():
