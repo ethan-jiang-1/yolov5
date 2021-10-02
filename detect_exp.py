@@ -27,7 +27,7 @@ from utils.plots import Annotator, colors
 from utils.torch_utils import select_device, load_classifier, time_sync  # noqa
 
 #ethan add 1
-from utils.general_exp import apply_classifier_exp, load_classifier_exp, annotator_box_label_exp, ENABLE_CLASSIFER
+from utils.general_exp import apply_classifier_exp, load_classifier_exp, annotator_box_label_exp, has_classifier_enabled
 
 @torch.no_grad()
 def run(weights='yolov5s.pt',  # model.pt path(s)
@@ -73,7 +73,8 @@ def run(weights='yolov5s.pt',  # model.pt path(s)
 
     # ethan add/modify 2
     classify, suffix = False, Path(w).suffix.lower()
-    if ENABLE_CLASSIFER:
+    if has_classifier_enabled():
+        print(colorstr("blue", "2nd-stage classifier enabled"))
         classify, suffix = True, Path(w).suffix.lower()
     
     pt, onnx, tflite, pb, saved_model = (suffix == x for x in ['.pt', '.onnx', '.tflite', '.pb', ''])  # backend

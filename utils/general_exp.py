@@ -9,6 +9,18 @@ from utils.general import xyxy2xywh, xywh2xyxy, scale_coords
 
 ENABLE_CLASSIFER = False
 ENABLE_DUMP_CROP_IMGS = True
+s_classifiy_cnt = -1
+
+
+def enable_classifier(enable_disable):
+    global ENABLE_CLASSIFER
+    ENABLE_CLASSIFER = enable_disable
+    print("ENABLE_CLASSIFER", ENABLE_CLASSIFER)
+    return ENABLE_CLASSIFER
+
+def has_classifier_enabled():
+    return ENABLE_CLASSIFER
+
 
 def _load_classifier(name='resnet101', n=2):
     if not ENABLE_CLASSIFER:
@@ -40,7 +52,6 @@ def load_classifier_exp(device):
     modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
     return modelc
 
-s_classifiy_cnt = -1
 
 def apply_classifier_exp(x, model, img, im0):
     global s_classifiy_cnt
