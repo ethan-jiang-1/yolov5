@@ -1,14 +1,16 @@
 import numpy as np
 import cv2
+import os
 import torch
 import torchvision
 import torch.nn as nn
 from utils.general import xyxy2xywh, xywh2xyxy, scale_coords
 
+
 ENABLE_CLASSIFER = False
 ENABLE_DUMP_CROP_IMGS = True
 
-def load_classifier_exp(name='resnet101', n=2):
+def _load_classifier(name='resnet101', n=2):
     if not ENABLE_CLASSIFER:
         return None
 
@@ -34,12 +36,16 @@ def load_classifier_exp(device):
     if not ENABLE_CLASSIFER:
         return None
 
-    modelc = load_classifier_exp(name='resnet50', n=2)  # initialize
+    modelc = _load_classifier(name='resnet50', n=2)  # initialize
     modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
     return modelc
 
+s_classifiy_cnt = -1
 
 def apply_classifier_exp(x, model, img, im0):
+    global s_classifiy_cnt
+    s_classifiy_cnt += 1
+
     # Apply a second stage classifier to yolo outputs
     im0 = [im0] if isinstance(im0, np.ndarray) else im0
     for i, d in enumerate(x):  # per image
@@ -63,7 +69,8 @@ def apply_classifier_exp(x, model, img, im0):
                 im = cv2.resize(cutout, (224, 224))  # BGR
 
                 if ENABLE_DUMP_CROP_IMGS:
-                    cv2.imwrite('cls_crop_{}_{}.jpg'.format(i, j), cutout)
+                    os.makedirs("run_crops", exist_ok=True)
+                    cv2.imwrite('run_crops/cls_crop_{:03}_{:02}_{:02}.jpg'.format(s_classifiy_cnt, i, j), cutout)
 
                 im = im[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
                 im = np.ascontiguousarray(im, dtype=np.float32)  # uint8 to float32

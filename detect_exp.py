@@ -24,7 +24,7 @@ from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, check_requirements, check_imshow, colorstr, is_ascii, non_max_suppression, \
     apply_classifier, scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path, save_one_box  # noqa
 from utils.plots import Annotator, colors
-from utils.torch_utils import select_device, load_classifier, time_sync
+from utils.torch_utils import select_device, load_classifier, time_sync  # noqa
 
 #ethan add 1
 from utils.general_exp import apply_classifier_exp, load_classifier_exp, annotator_box_label_exp, ENABLE_CLASSIFER
