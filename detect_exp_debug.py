@@ -1,7 +1,7 @@
 import sys
 import os
 import shutil
-from detect_exp import parse_opt, main 
+from detect_exp import parse_opt, main, ROOT 
 from utils.general_exp import enable_classifier, enable_dump_corp_imgs
 
 def _makeup_argv():
@@ -11,6 +11,8 @@ def _makeup_argv():
     cmd += "--line-thickness 1 "
     cmd += "--save-txt "
     cmd += "--name debug "
+
+    cmd += "--project runs/detect "
     
     #cmd += "--source ../ds_yolov5_exam/exam_sac15/images_0"
     #cmd += "--source ../ds_yolov5_exam/exam_sac15/images_b0/84696d2c-000b-4c2d-b88d-be30a2f5ecc3.jpeg"
@@ -29,6 +31,8 @@ def _cleanup_output():
         shutil.rmtree(dir_runs_crop)        
 
 def _prepare_env():
+    print()
+    print("ROOT", ROOT)
     dir_yolov5 = os.path.dirname(__file__)
     os.chdir(dir_yolov5)
 
@@ -38,6 +42,7 @@ def _prepare_env():
     enable_dump_corp_imgs(True)
 
 def do_detect_exp():
+
     _prepare_env()
 
     _makeup_argv()
