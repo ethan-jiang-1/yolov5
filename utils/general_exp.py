@@ -10,6 +10,10 @@ from utils.general import xyxy2xywh, xywh2xyxy, scale_coords
 ENABLE_CLASSIFER = False
 ENABLE_DUMP_CROP_IMGS = False
 ENABLE_DUMP_CROP_LOG = False
+
+FLAG_HOOK_REAL_2ND_CLASSIFIER = False        # default is True
+FLAG_ADD_PADDING_TO_2ND_CLASSIFIER = False   # default is True
+
 s_classifiy_cnt = -1
 
 
@@ -55,6 +59,10 @@ def load_classifier_exp(device):
     if not ENABLE_CLASSIFER:
         return None
 
+    if not FLAG_HOOK_REAL_2ND_CLASSIFIER:
+        print("WARNING: 2nd stage classifier not hooked !")
+        return None
+
     try:
         modelc = _load_classifier(name='resnet50', n=2)  # initialize
         modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
@@ -77,7 +85,9 @@ def apply_classifier_exp(x, model, img, im0):
             # Reshape and pad cutouts
             b = xyxy2xywh(d[:, :4])  # boxes
             b[:, 2:] = b[:, 2:].max(1)[0].unsqueeze(1)  # rectangle to square
-            b[:, 2:] = b[:, 2:] * 1.3 + 30  # pad
+            # ethan modify: this add padding
+            if FLAG_ADD_PADDING_TO_2ND_CLASSIFIER:
+                b[:, 2:] = b[:, 2:] * 1.3 + 30  # pad
             d[:, :4] = xywh2xyxy(b).long()
 
             # Rescale boxes from img_size to im0 size
@@ -91,9 +101,14 @@ def apply_classifier_exp(x, model, img, im0):
                 im = cv2.resize(cutout, (224, 224))  # BGR
 
                 if ENABLE_DUMP_CROP_IMGS:
-                    os.makedirs("run_crops", exist_ok=True)
-                    cv2.imwrite('run_crops/cls_crop_{:03}_{:02}_{:02}.jpg'.format(s_classifiy_cnt, i, j), cutout)
+                    name = "runs/detect_crops/cls_crop_{:03}_{:02}_{:02}".format(s_classifiy_cnt, i, j)
+                    os.makedirs("runs/detect_crops/", exist_ok=True)
+                    cv2.imwrite(name + ".jpg", cutout)
+                    with open(name + ".txt", "wt+") as f:
+                        f.write(str(a))
 
+                # Ethan, the following is kind of transform before feed to 2nd-stage classifier
+                # should be replaced by timm's transfrom if we use timm
                 im = im[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
                 im = np.ascontiguousarray(im, dtype=np.float32)  # uint8 to float32
                 im /= 255.0  # 0 - 255 to 0.0 - 1.0
