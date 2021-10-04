@@ -13,7 +13,9 @@ def _makeup_argv():
     cmd += "--name debug "
     
     #cmd += "--source ../ds_yolov5_exam/exam_sac15/images_0"
-    cmd += "--source ../ds_yolov5_exam/exam_sac15/images_b0/84696d2c-000b-4c2d-b88d-be30a2f5ecc3.jpeg"
+    #cmd += "--source ../ds_yolov5_exam/exam_sac15/images_b0/84696d2c-000b-4c2d-b88d-be30a2f5ecc3.jpeg"
+
+    cmd += "--source ../ds_yolov5_exam/exam_sac60/images_r0/sac60_test_4024.jpg"
 
     sys.argv = cmd.split(" ")
     print(sys.argv)
