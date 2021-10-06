@@ -2,11 +2,14 @@ import sys
 import os
 import shutil
 from detect_exp import parse_opt, main, ROOT 
-from utils.general_exp import enable_classifier, enable_dump_corp_imgs
+from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
 
 def _makeup_argv():
     cmd = "detect.py "
-    cmd += "--weights weights/yolov5s/run_sac60_r1_e300_model-best.pt "
+   
+    cmd += "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
+    #cmd += "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
+   
     cmd += "--imgsz 640 "
     cmd += "--line-thickness 1 "
     cmd += "--save-txt "

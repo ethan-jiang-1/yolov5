@@ -369,10 +369,12 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         scheduler.step()
 
         #ethan add/modify 4
+        save_ckpt = False
         if has_save_signal_received():
             InterruptSignal.reset_kill_signal()
-            print("change epoch from {} to {} ".format(epoch, epochs-1))
-            epoch = epochs - 1
+            if not evolve:
+                print(colorstr("blue", "save current checkpoint as save signal received"))
+                save_ckpt = True
     
         if RANK in [-1, 0]:
             # mAP
@@ -399,7 +401,9 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
             callbacks.run('on_fit_epoch_end', log_vals, epoch, best_fitness, fi)
 
             # Save model
-            if (not nosave) or (final_epoch and not evolve):  # if save
+            # ethan modified 5
+            # if (not nosave) or (final_epoch and not evolve):
+            if (not nosave) or (final_epoch and not evolve) or (save_ckpt):  # if save
                 ckpt = {'epoch': epoch,
                         'best_fitness': best_fitness,
                         'model': deepcopy(de_parallel(model)).half(),
@@ -429,8 +433,9 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         # if stop:
         #    break  # must break all DDP ranks
 
-        #ethan add 5
+        #ethan add 6
         if has_stop_signal_received():
+            print(colorstr("blue", "break training as stop signal received"))
             break
 
         # end epoch ----------------------------------------------------------------------------------------------------

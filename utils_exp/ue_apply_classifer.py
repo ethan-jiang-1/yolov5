@@ -5,36 +5,27 @@ import torch
 import torchvision
 import torch.nn as nn
 from utils.general import xyxy2xywh, xywh2xyxy, scale_coords
+from utils_exp.ue_control import set_control_flag, get_control_flag
 
-
-ENABLE_CLASSIFER = False
-ENABLE_DUMP_CROP_IMGS = False
-ENABLE_DUMP_CROP_LOG = False
-
-FLAG_HOOK_REAL_2ND_CLASSIFIER = False        # default is True
-FLAG_ADD_PADDING_TO_2ND_CLASSIFIER = False   # default is True
 
 s_classifiy_cnt = -1
 
 
 def enable_classifier(enable_disable):
-    global ENABLE_CLASSIFER
-    ENABLE_CLASSIFER = enable_disable
-    print("ENABLE_CLASSIFER", ENABLE_CLASSIFER)
-    return ENABLE_CLASSIFER
+    return set_control_flag("FLAG_ENABLE_CLASSIFER", enable_disable)
 
 def enable_dump_corp_imgs(enable_disable):
-    global ENABLE_DUMP_CROP_IMGS
-    ENABLE_DUMP_CROP_IMGS = enable_disable
-    print("ENABLE_DUMP_CROP_IMGS", ENABLE_DUMP_CROP_IMGS)
-    return ENABLE_DUMP_CROP_IMGS
+    return set_control_flag("FLAG_ENABLE_DUMP_CROP_IMGS", enable_disable)
 
 def has_classifier_enabled():
-    return ENABLE_CLASSIFER
+    return get_control_flag("FLAG_ENABLE_CLASSIFER")
+
+def has_real_classifier_hooked():
+    return get_control_flag("FLAG_HOOK_REAL_2ND_CLASSIFIER")
 
 
 def _load_classifier(name='resnet50', n=2):
-    if not ENABLE_CLASSIFER:
+    if not has_classifier_enabled():
         return None
 
     # Loads a pretrained model reshaped to n-class output
@@ -56,10 +47,10 @@ def _load_classifier(name='resnet50', n=2):
 
 
 def load_classifier_exp(device):
-    if not ENABLE_CLASSIFER:
+    if not has_classifier_enabled():
         return None
 
-    if not FLAG_HOOK_REAL_2ND_CLASSIFIER:
+    if not has_real_classifier_hooked():
         print("WARNING: 2nd stage classifier not hooked !")
         return None
 
@@ -86,7 +77,7 @@ def apply_classifier_exp(x, model, img, im0):
             b = xyxy2xywh(d[:, :4])  # boxes
             b[:, 2:] = b[:, 2:].max(1)[0].unsqueeze(1)  # rectangle to square
             # ethan modify: this add padding
-            if FLAG_ADD_PADDING_TO_2ND_CLASSIFIER:
+            if get_control_flag("FLAG_ADD_PADDING_TO_2ND_CLASSIFIER"):
                 b[:, 2:] = b[:, 2:] * 1.3 + 30  # pad
             d[:, :4] = xywh2xyxy(b).long()
 
@@ -100,7 +91,7 @@ def apply_classifier_exp(x, model, img, im0):
                 cutout = im0[i][int(a[1]):int(a[3]), int(a[0]):int(a[2])]
                 im = cv2.resize(cutout, (224, 224))  # BGR
 
-                if ENABLE_DUMP_CROP_IMGS:
+                if get_control_flag("FLAG_ENABLE_DUMP_CROP_IMGS"):
                     name = "runs/detect_crops/cls_crop_{:03}_{:02}_{:02}".format(s_classifiy_cnt, i, j)
                     os.makedirs("runs/detect_crops/", exist_ok=True)
                     cv2.imwrite(name + ".jpg", cutout)
@@ -119,23 +110,3 @@ def apply_classifier_exp(x, model, img, im0):
                 x[i] = x[i][pred_cls1 == pred_cls2]  # retain matching class detections
 
     return x
-
-
-def annotator_box_label_exp(annotator, xyxy, label, color=None):
-    dx = abs(xyxy[0] - xyxy[2])
-    dy = abs(xyxy[1] - xyxy[3])
-    if dx < 48 or dy < 48:
-        label = None
-
-    if label is not None:
-        if label.find("BK0") != -1:
-            label = None
-        elif label.find("hand") != -1:
-            label = None
-        elif label.find("HBU") != -1:
-            label = label.replace("HBU", "")
-
-    if label is not None:
-        annotator.box_label(xyxy, label, color)
-    else:
-        print("ignored by annotator_box_label_exp", label, xyxy)

@@ -30,7 +30,9 @@ from utils.plots import Annotator, colors
 from utils.torch_utils import load_classifier, select_device, time_sync   # noqa
 
 #ethan add 1
-from utils.general_exp import apply_classifier_exp, load_classifier_exp, annotator_box_label_exp, has_classifier_enabled
+from utils_exp.ue_apply_classifer import apply_classifier_exp, load_classifier_exp, has_classifier_enabled
+from utils_exp.ue_annotator_box_label import annotator_box_label_exp
+from utils_exp.ue_non_max_suppression import non_max_suppression_exp
 
 
 @torch.no_grad()
@@ -180,12 +182,14 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         dt[1] += t3 - t2
 
         # NMS
-        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+        #ethan 4:
+        # pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+        pred = non_max_suppression_exp(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
         dt[2] += time_sync() - t3
 
         # Second-stage classifier (optional)
         if classify:
-            #ethan 4: 
+            #ethan 5: 
             # pred = apply_classifier(pred, modelc, img, im0s)
             pred = apply_classifier_exp(pred, modelc, img, im0s)
 
@@ -225,7 +229,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
 
-                        #ethan add / modify 5
+                        #ethan add / modify 6
                         #annotator.box_label(xyxy, label, color=colors(c, True))
                         annotator_box_label_exp(annotator, xyxy, label, color=colors(c, True))
 
