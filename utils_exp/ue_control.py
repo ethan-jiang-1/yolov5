@@ -9,7 +9,9 @@ s_control_names = {
     "FLAG_SHORTEN_LABEL": True,
     "FLAG_LABEL_BK": True,
     "FLAG_LABEL_HAND": True,
-    "FLAG_LABEL_SMALL": True}
+    "FLAG_LABEL_SMALL": True,
+    
+    "FLAG_OBJECT_TRACKING": False}
 
 
 def set_control_flag(control_name, enable_disable):
@@ -18,9 +20,10 @@ def set_control_flag(control_name, enable_disable):
         print("Change {} from {} to {}".format(control_name, s_control_names[control_name], enable_disable))
         s_control_names[control_name] = enable_disable
         return s_control_names[control_name]
-    return None
+    raise ValueError("uknown Flag: {}".format(control_name))
 
 def get_control_flag(control_name):
     if control_name in s_control_names:
         return s_control_names[control_name]
-    return None
+    raise ValueError("uknown Flag: {}".format(control_name))
+
