@@ -23,27 +23,31 @@ extend_sys_paths()
 
 from detect_exp import parse_opt, main, ROOT 
 from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
-from utils_exp.ue_annotator_box_label import enable_object_trackig
+from utils_exp.ue_annotator_box_label import enable_object_trackig, enable_dump_track_imgs
 
-USING_WEB_CAM = False
-USING_2ND_CLASSIFIER = False
-USING_OBJ_TRACKING = True
+OD_SOURCE_TYPE = "mp4"  # "webcam"   # "webcam", "image", "mp4"
+OD_2ND_CLASSIFIER = False
+
 
 def _get_weight_pt():
     cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
     #cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
+    #cmd = "--weights weights/yolov5l/run_lac60_r1_e310_model-best.pt "
     return cmd
 
 def _get_source():
-    if not USING_WEB_CAM:
+    if OD_SOURCE_TYPE == "webcam":
+        cmd = "--source 0"  # webcam usb
+        #cmd = "--source 1"  # webcam screen
+        #cmd = "--source 2"  # webcam screen
+    elif OD_SOURCE_TYPE == "mp4":
+        cmd = "--source ../ds_yolov5_exam/exam_tracking/video_0/track.mp4"
+    else:
         #cmd = "--source ../ds_yolov5_exam/exam_sac15/images_0"
         #cmd = "--source ../ds_yolov5_exam/exam_sac15/images_b0/84696d2c-000b-4c2d-b88d-be30a2f5ecc3.jpeg"
         #cmd = "--source ../ds_yolov5_exam/exam_sac60/images_r0/sac60_test_4024.jpg"
         cmd = "--source ../ds_yolov5_exam/exam_tracking/tracking_0"
-    else:
-        cmd = "--source 0"  # webcam usb
-        #cmd = "--source 1"  # webcam screen
-        #cmd = "--source 2"  # webcam screen
+
     return cmd + " "
 
 def _makeup_argv():
@@ -51,14 +55,14 @@ def _makeup_argv():
    
     cmd += "--imgsz 640 "
     #cmd += "--line-thickness 1 "
-    cmd += "--line-thickness 3 "
-
+    cmd += "--line-thickness 2 "
     cmd += "--save-txt "
-    cmd += "--name debug "
-    cmd += "--conf-thres 0.60 "
+
+    cmd += "--conf-thres 0.40 "
 
     cmd += "--project runs/detect "
-    
+    cmd += "--name debug "
+
     cmd += _get_weight_pt()
     cmd += _get_source()
 
@@ -82,17 +86,17 @@ def _prepare_env():
 
     _cleanup_output()
 
-    if USING_2ND_CLASSIFIER:
+    if OD_2ND_CLASSIFIER:
         enable_classifier(True)
         enable_dump_corp_imgs(True)
 
-    if USING_OBJ_TRACKING:
+    if OD_SOURCE_TYPE == "mp4":
         enable_object_trackig(True)
+        #enable_dump_track_imgs(True)
 
 def do_detect_exp():
 
     _prepare_env()
-
     _makeup_argv()
 
     opt = parse_opt()

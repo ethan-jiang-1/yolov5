@@ -2,6 +2,7 @@ s_control_names = {
     "FLAG_ENABLE_CLASSIFER":  False,
     "FLAG_ENABLE_DUMP_CROP_IMGS": False,
 
+
     "FLAG_ENABLE_DUMP_CROP_LOG": False,
     "FLAG_HOOK_REAL_2ND_CLASSIFIER": False,
     "FLAG_ADD_PADDING_TO_2ND_CLASSIFIER": False,
@@ -11,8 +12,8 @@ s_control_names = {
     "FLAG_LABEL_HAND": True,
     "FLAG_LABEL_SMALL": True,
     
-    "FLAG_OBJECT_TRACKING": False}
-
+    "FLAG_OBJECT_TRACKING": False,
+    "FLAG_ENABLE_DUMP_TRACK_IMGS": False}
 
 def set_control_flag(control_name, enable_disable):
     global s_control_names

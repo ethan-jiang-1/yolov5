@@ -232,7 +232,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                         #ethan add / modify 6
                         #annotator.box_label(xyxy, label, color=colors(c, True))
                         if has_object_tracking():
-                            track_box_label_exp(annotator, xyxy, label, colors(c, True), conf, cls, i)
+                            track_box_label_exp(annotator, xyxy, label, colors(c, True), conf, cls, i, txt_path)
                         else:
                             annotator_box_label_exp(annotator, xyxy, label, color=colors(c, True))
 
@@ -268,7 +268,9 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                         else:  # stream
                             fps, w, h = 30, im0.shape[1], im0.shape[0]
                             save_path += '.mp4'
+                            
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+
                     vid_writer[i].write(im0)
 
     # Print results

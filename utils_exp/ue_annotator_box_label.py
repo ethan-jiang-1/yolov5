@@ -1,5 +1,7 @@
 import os
 import sys
+import cv2
+import shutil
 
 def _add_sys_path(new_sys_path):
     if new_sys_path not in sys.path:
@@ -30,6 +32,12 @@ def has_object_tracking():
 def enable_object_trackig(enable_disable):
     return set_control_flag("FLAG_OBJECT_TRACKING", enable_disable)
 
+def need_dump_tracking_imgs():
+    return get_control_flag("FLAG_ENABLE_DUMP_TRACK_IMGS")
+
+def enable_dump_track_imgs(enable_disable):
+    return set_control_flag("FLAG_ENABLE_DUMP_TRACK_IMGS", enable_disable)
+
 def annotator_box_label_exp(annotator, xyxy, label, color=None):
     dx = abs(xyxy[0] - xyxy[2])
     dy = abs(xyxy[1] - xyxy[3])
@@ -51,10 +59,30 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
         print("ignored by annotator_box_label_exp", label, xyxy)
 
 
-def track_box_label_exp(annotator, xyxy, label, color, conf, cls, i):
+def track_box_label_exp(annotator, xyxy, label, color, conf, cls, i, txt_path_stem):
     annotator_box_label_exp(annotator, xyxy, label, color=color)
+    jpg_path = txt_path_stem.replace("/labels/", "/images/") + ".jpg"
+    _track_annotated_img_exp(jpg_path, annotator.im)
+    
 
+s_track_count = 0
+def _track_annotated_img_exp(save_path, im0):
+    global s_track_count
+    if not has_object_tracking():
+        return False
+    
+    if not need_dump_tracking_imgs():
+        return False
 
+    dir_name = os.path.dirname(save_path)
+    if s_track_count == 0:
+        if os.path.isdir(dir_name):
+            shutil.rmtree(dir_name)
+        os.makedirs(dir_name, exist_ok=True)
+
+    cv2.imwrite(save_path, im0)
+    s_track_count += 1
+    return True
 
 
 if __name__ == "__main__":
