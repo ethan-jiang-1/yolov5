@@ -240,7 +240,11 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
 
             # Print time (inference-only)
-            print(f'{s}Done. ({t3 - t2:.3f}s)')
+            #ethan add / modify 7
+            #print(f'{s}Done. ({t3 - t2:.3f}s)')
+            mem = f'{torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0:.3g}G'  # (GB)
+            print(f'{s}Done. ({t3 - t2:.3f}s, GPU:{mem})')
+    
 
             # Stream results
             im0 = annotator.result()
@@ -275,6 +279,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
         print(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
+
 
 
 def parse_opt():
