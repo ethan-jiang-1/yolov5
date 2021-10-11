@@ -25,7 +25,7 @@ from detect_exp import parse_opt, main, ROOT
 from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
 from utils_exp.ue_annotator_box_label import enable_object_trackig, enable_dump_track_imgs
 
-OD_SOURCE_TYPE = "mp4"  # "webcam"   # "webcam", "image", "mp4"
+OD_SOURCE_TYPE = "mp4jpg"  # "webcam", "image", "mp4", "mp4jpg"
 OD_2ND_CLASSIFIER = False
 
 
@@ -37,17 +37,21 @@ def _get_weight_pt():
 
 def _get_source():
     if OD_SOURCE_TYPE == "webcam":
-        cmd = "--source 0"  # webcam usb
-        #cmd = "--source 1"  # webcam screen
-        #cmd = "--source 2"  # webcam screen
+        source = "0"  # webcam usb
+        #source = "1"  # webcam screen
     elif OD_SOURCE_TYPE == "mp4":
-        cmd = "--source ../ds_yolov5_exam/exam_tracking/video_0/track.mp4"
+        source = "../ds_yolov5_exam/exam_tracking/video_0/track.mp4"
+    elif OD_SOURCE_TYPE == "mp4jpg":
+        source = "../dx_mp4_jpg"
+    elif OD_SOURCE_TYPE == "image":
+        source = "/ds_yolov5_exam/exam_tracking/tracking_0"
     else:
-        #cmd = "--source ../ds_yolov5_exam/exam_sac15/images_0"
-        #cmd = "--source ../ds_yolov5_exam/exam_sac15/images_b0/84696d2c-000b-4c2d-b88d-be30a2f5ecc3.jpeg"
-        #cmd = "--source ../ds_yolov5_exam/exam_sac60/images_r0/sac60_test_4024.jpg"
-        cmd = "--source ../ds_yolov5_exam/exam_tracking/tracking_0"
+        raise ValueError("not-support")
 
+    print()
+    print("OD_SOURCE_TYPE:", OD_SOURCE_TYPE, "source", source)
+    print()
+    cmd = "--source {}".format(source )
     return cmd + " "
 
 def _makeup_argv():
@@ -61,7 +65,7 @@ def _makeup_argv():
     cmd += "--conf-thres 0.40 "
 
     cmd += "--project runs/detect "
-    cmd += "--name debug "
+    cmd += "--name debug_{} ".format(OD_SOURCE_TYPE)
 
     cmd += _get_weight_pt()
     cmd += _get_source()
@@ -90,7 +94,7 @@ def _prepare_env():
         enable_classifier(True)
         enable_dump_corp_imgs(True)
 
-    if OD_SOURCE_TYPE == "mp4":
+    if OD_SOURCE_TYPE in ["mp4", "mp4jpg"]:
         enable_object_trackig(True)
         #enable_dump_track_imgs(True)
 
