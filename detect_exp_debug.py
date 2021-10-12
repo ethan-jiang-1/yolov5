@@ -23,7 +23,7 @@ extend_sys_paths()
 
 from detect_exp import parse_opt, main, ROOT 
 from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
-from utils_exp.ue_annotator_box_label import enable_object_trackig, enable_dump_track_imgs
+from utils_exp.ue_annotator_box_label import enable_object_trackig  # , enable_dump_track_imgs
 
 OD_2ND_CLASSIFIER = False
 OD_SOURCE_TYPE = "mp4jpg"  # "webcam", "image", "mp4", "mp4jpg"
@@ -68,7 +68,7 @@ def _get_source():
     print()
     print("OD_SOURCE_TYPE:", OD_SOURCE_TYPE, "OD_MODEL_TYPE", OD_MODEL_TYPE, "source", source)
     print()
-    cmd = "--source {}".format(source )
+    cmd = "--source {}".format(source)
     return cmd + " "
 
 def _makeup_argv():

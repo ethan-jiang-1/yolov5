@@ -24,6 +24,8 @@ def extend_sys_paths():
 extend_sys_paths()
 
 from utils_exp.ue_control import set_control_flag, get_control_flag
+from utils_exp.ue_detection_tracker import DetectionTracker
+from utils.plots import colors
 
 
 def has_object_tracking():
@@ -56,9 +58,51 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
     annotator.box_label(xyxy, label, color)
 
 def track_box_label_exp(annotator, xyxy, label, color, conf, cls, i, txt_path_stem):
-    annotator_box_label_exp(annotator, xyxy, label, color=color)
-    jpg_path = txt_path_stem.replace("/labels/", "/images/") + ".jpg"
-    _track_annotated_img_exp(jpg_path, annotator.im)
+    #annotator_box_label_exp(annotator, xyxy, label, color=color)
+    #jpg_path = txt_path_stem.replace("/labels/", "/images/") + ".jpg"
+    #_track_annotated_img_exp(jpg_path, annotator.im)
+    pass
+
+
+def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=None, extra=None):
+    frame = img
+    if frame is None:
+        return 
+
+    if track_found is None:
+        return 
+
+    annotator = extra
+    if annotator is None:
+        return 
+    
+    color_box = colors(int(klx), True)
+    color_txt = (255, 255, 255)
+    label = ""
+    if s_names:
+        label = s_names[klx]
+
+    x, y, w, h = avg_xywh
+    box = (int(x - 0.5 * w), int(y - 0.5 * h), int(x + 0.5 * w), int(y + 0.5 * h))
+    annotator.box_label(box, label=label, color=color_box, txt_color=color_txt)
+
+
+s_dtt = None
+s_names = None
+def track_detections_exp(annotator, detections, names):
+    global s_dtt
+    global s_names
+    im = annotator.im
+    if s_dtt is None:
+        if im is not None:
+            ch, cw = im.shape[0], im.shape[1]
+            s_dtt = DetectionTracker(ch, cw)
+            s_names = names
+
+    if s_dtt is None:
+        return
+    
+    s_dtt.draw_traced_detections(detections, fun_draw_tracked_fun=_fun_draw_tracked_fun, img=im, extra=annotator)
     
 
 s_track_count = 0

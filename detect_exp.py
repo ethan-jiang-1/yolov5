@@ -31,7 +31,7 @@ from utils.torch_utils import load_classifier, select_device, time_sync   # noqa
 
 #ethan add 1
 from utils_exp.ue_apply_classifer import apply_classifier_exp, load_classifier_exp, has_classifier_enabled
-from utils_exp.ue_annotator_box_label import annotator_box_label_exp, track_box_label_exp, has_object_tracking
+from utils_exp.ue_annotator_box_label import annotator_box_label_exp, track_box_label_exp, has_object_tracking, track_detections_exp
 from utils_exp.ue_non_max_suppression import non_max_suppression_exp
 
 
@@ -217,6 +217,8 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                     n = (det[:, -1] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
+                #ethan add / modify 6
+                detections = []
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
                     if save_txt:  # Write to file
@@ -229,7 +231,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f'{names[c]} {conf:.2f}')
 
-                        #ethan add / modify 6
+                        #ethan add / modify 7
                         #annotator.box_label(xyxy, label, color=colors(c, True))
                         if has_object_tracking():
                             track_box_label_exp(annotator, xyxy, label, colors(c, True), conf, cls, i, txt_path)
@@ -239,8 +241,17 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)
 
+                    #ethan add 8
+                    xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
+                    detections.append((cls, *xywh, conf))
+                
+                ##ethan add 9
+                if has_object_tracking():
+                    track_detections_exp(annotator, detections, names)
+
+
             # Print time (inference-only)
-            #ethan add / modify 7
+            #ethan add / modify 10
             #print(f'{s}Done. ({t3 - t2:.3f}s)')
             mem = f'{torch.cuda.memory_reserved() / 1E9 if torch.cuda.is_available() else 0:.3g}G'  # (GB)
             print(f'{s}Done. ({t3 - t2:.3f}s, GPU:{mem})')
