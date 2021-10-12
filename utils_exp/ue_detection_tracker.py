@@ -169,11 +169,12 @@ class CentroidTracker():
 
 
 class DetectionTracker(object):
-    def __init__(self, ch, cw, maxDisappeared=100, maxQueueLen=5):
+    def __init__(self, ch, cw, klx_names, maxDisappeared=100, maxQueueLen=5):
         self.maxDisappeared = maxDisappeared
         self.maxQueueLen = maxQueueLen
         self.ch = ch
         self.cw = cw
+        self.klx_names = klx_names
         
         self.cur_objs = {}
         self.cur_tracks = []
@@ -224,11 +225,22 @@ class DetectionTracker(object):
         cY = int((y0 + y1) / 2.0)
         return [x0, y0, x1, y1, klx], (cX, cY), (x1 - x0) * (y1 - y0)
 
+    def _is_trackable_obj(self, obj_klx):
+        if self.klx_names is not None:
+            val = int(obj_klx.item())
+            if val < len(self.klx_names):
+                if self.klx_names[val] == "hand":
+                    return False
+        return True
+
     def feed_detects(self, detections):
         rect_klxs = []
         tracks = []
         for detection in detections:
             obj_klx, x, y, w, h, conf = detection
+
+            if not self._is_trackable_obj(obj_klx):
+                    continue
 
             rect_klx, centroid, area = self._convert_xywh2rectca(x, y, w, h, obj_klx)
             rect_klxs.append(rect_klx)

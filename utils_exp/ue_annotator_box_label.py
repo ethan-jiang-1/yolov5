@@ -57,12 +57,6 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
 
     annotator.box_label(xyxy, label, color)
 
-def track_box_label_exp(annotator, xyxy, label, color, conf, cls, i, txt_path_stem):
-    #annotator_box_label_exp(annotator, xyxy, label, color=color)
-    #jpg_path = txt_path_stem.replace("/labels/", "/images/") + ".jpg"
-    #_track_annotated_img_exp(jpg_path, annotator.im)
-    pass
-
 
 def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=None, extra=None):
     frame = img
@@ -77,14 +71,16 @@ def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=No
         return 
     
     color_box = colors(int(klx), True)
-    color_txt = (255, 255, 255)
+    # color_txt = (255, 255, 255)
     label = ""
+    conf = float(track_found.conf.item())
     if s_names:
-        label = s_names[klx]
+        label = "{} {:02}".format(s_names[klx], int(100*conf + 0.5))
 
     x, y, w, h = avg_xywh
     box = (int(x - 0.5 * w), int(y - 0.5 * h), int(x + 0.5 * w), int(y + 0.5 * h))
-    annotator.box_label(box, label=label, color=color_box, txt_color=color_txt)
+    # annotator.box_label(box, label=label, color=color_box, txt_color=color_txt)
+    annotator_box_label_exp(annotator, box, label, color=color_box)
 
 
 s_dtt = None
@@ -96,7 +92,7 @@ def track_detections_exp(annotator, detections, names):
     if s_dtt is None:
         if im is not None:
             ch, cw = im.shape[0], im.shape[1]
-            s_dtt = DetectionTracker(ch, cw)
+            s_dtt = DetectionTracker(ch, cw, names)
             s_names = names
 
     if s_dtt is None:

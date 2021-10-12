@@ -31,7 +31,7 @@ from utils.torch_utils import load_classifier, select_device, time_sync   # noqa
 
 #ethan add 1
 from utils_exp.ue_apply_classifer import apply_classifier_exp, load_classifier_exp, has_classifier_enabled
-from utils_exp.ue_annotator_box_label import annotator_box_label_exp, track_box_label_exp, has_object_tracking, track_detections_exp
+from utils_exp.ue_annotator_box_label import annotator_box_label_exp, has_object_tracking, track_detections_exp
 from utils_exp.ue_non_max_suppression import non_max_suppression_exp
 
 
@@ -233,9 +233,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
 
                         #ethan add / modify 7
                         #annotator.box_label(xyxy, label, color=colors(c, True))
-                        if has_object_tracking():
-                            track_box_label_exp(annotator, xyxy, label, colors(c, True), conf, cls, i, txt_path)
-                        else:
+                        if not has_object_tracking():
                             annotator_box_label_exp(annotator, xyxy, label, color=colors(c, True))
 
                         if save_crop:

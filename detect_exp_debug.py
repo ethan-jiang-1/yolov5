@@ -26,9 +26,10 @@ from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_img
 from utils_exp.ue_annotator_box_label import enable_object_trackig  # , enable_dump_track_imgs
 
 OD_2ND_CLASSIFIER = False
-OD_SOURCE_TYPE = "mp4jpg"  # "webcam", "image", "mp4", "mp4jpg"
 OD_MODEL_TYPE = "s"
 OD_TRACKING_SAMPLE = True
+
+OD_SOURCE_TYPE = "mp4"  # "webcam", "image", "mp4", "mp4jpg"
 
 
 def _get_label_params():
@@ -57,7 +58,8 @@ def _get_source():
         source = "0"  # webcam usb
         #source = "1"  # webcam screen
     elif OD_SOURCE_TYPE == "mp4":
-        source = "../ds_yolov5_exam/exam_tracking/video_0/track.mp4"
+        #source = "../ds_yolov5_exam/exam_tracking/video_0/track_0.mp4"
+        source = "../ds_yolov5_exam/exam_tracking/video_a/track_a.mp4"
     elif OD_SOURCE_TYPE == "mp4jpg":
         source = "../dx_mp4_jpg"
     elif OD_SOURCE_TYPE == "image":
