@@ -25,14 +25,31 @@ from detect_exp import parse_opt, main, ROOT
 from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
 from utils_exp.ue_annotator_box_label import enable_object_trackig, enable_dump_track_imgs
 
-OD_SOURCE_TYPE = "mp4jpg"  # "webcam", "image", "mp4", "mp4jpg"
 OD_2ND_CLASSIFIER = False
+OD_SOURCE_TYPE = "mp4jpg"  # "webcam", "image", "mp4", "mp4jpg"
+OD_MODEL_TYPE = "s"
+OD_TRACKING_SAMPLE = True
 
+
+def _get_label_params():
+    cmd = ""
+    if OD_TRACKING_SAMPLE:
+        cmd += "--hide-conf "
+        cmd += "--hide-labels "
+        cmd += "--line-thickness 1 "
+    else:
+        cmd += "--line-thickness 2 "
+    return cmd
 
 def _get_weight_pt():
-    cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
-    #cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
-    #cmd = "--weights weights/yolov5l/run_lac60_r1_e310_model-best.pt "
+    if OD_MODEL_TYPE == "s":
+        cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
+    elif OD_MODEL_TYPE == "m":
+        cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
+    elif OD_MODEL_TYPE == "l":
+        cmd = "--weights weights/yolov5l/run_lac60_r1_e310_model-best.pt "
+    else:
+        raise ValueError("not support")
     return cmd
 
 def _get_source():
@@ -49,7 +66,7 @@ def _get_source():
         raise ValueError("not-support")
 
     print()
-    print("OD_SOURCE_TYPE:", OD_SOURCE_TYPE, "source", source)
+    print("OD_SOURCE_TYPE:", OD_SOURCE_TYPE, "OD_MODEL_TYPE", OD_MODEL_TYPE, "source", source)
     print()
     cmd = "--source {}".format(source )
     return cmd + " "
@@ -58,15 +75,14 @@ def _makeup_argv():
     cmd = "detect.py "
    
     cmd += "--imgsz 640 "
-    #cmd += "--line-thickness 1 "
-    cmd += "--line-thickness 2 "
     cmd += "--save-txt "
 
     cmd += "--conf-thres 0.40 "
 
     cmd += "--project runs/detect "
-    cmd += "--name debug_{} ".format(OD_SOURCE_TYPE)
+    cmd += "--name debug_{}_{} ".format(OD_SOURCE_TYPE, OD_MODEL_TYPE)
 
+    cmd += _get_label_params()
     cmd += _get_weight_pt()
     cmd += _get_source()
 

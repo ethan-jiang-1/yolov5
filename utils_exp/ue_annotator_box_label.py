@@ -53,11 +53,7 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
         elif label.find("HBU") != -1 and get_control_flag("FLAG_SHORTEN_LABEL"):
             label = label.replace("HBU", "")
 
-    if label is not None:
-        annotator.box_label(xyxy, label, color)
-    else:
-        print("ignored by annotator_box_label_exp", label, xyxy)
-
+    annotator.box_label(xyxy, label, color)
 
 def track_box_label_exp(annotator, xyxy, label, color, conf, cls, i, txt_path_stem):
     annotator_box_label_exp(annotator, xyxy, label, color=color)
