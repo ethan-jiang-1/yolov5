@@ -44,7 +44,8 @@ def _get_label_params():
 
 def _get_weight_pt():
     if OD_MODEL_TYPE == "s":
-        cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
+        #cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
+        cmd = "--weights weights/yolov5s/run_sac60_r2_e830_model-best.pt "
     elif OD_MODEL_TYPE == "m":
         cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
     elif OD_MODEL_TYPE == "l":
