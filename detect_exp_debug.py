@@ -26,7 +26,7 @@ from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_img
 from utils_exp.ue_annotator_box_label import enable_object_trackig  # , enable_dump_track_imgs
 
 OD_2ND_CLASSIFIER = False
-OD_MODEL_TYPE = "s"
+OD_MODEL_TYPE = "m"
 OD_TRACKING_SAMPLE = True
 
 OD_SOURCE_TYPE = "mp4"  # "webcam", "image", "mp4", "mp4jpg"
@@ -47,7 +47,8 @@ def _get_weight_pt():
         #cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
         cmd = "--weights weights/yolov5s/run_sac60_r2_e830_model-best.pt "
     elif OD_MODEL_TYPE == "m":
-        cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
+        #cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
+        cmd = "--weights weights/yolov5m/run_mac60_r2_e460_model-last.pt " 
     elif OD_MODEL_TYPE == "l":
         cmd = "--weights weights/yolov5l/run_lac60_r1_e310_model-best.pt "
     else:
