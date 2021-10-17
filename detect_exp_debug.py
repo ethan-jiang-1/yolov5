@@ -76,7 +76,7 @@ def _get_source():
     return cmd + " "
 
 def _makeup_argv():
-    cmd = "detect.py "
+    cmd = "detect_exp.py "
    
     cmd += "--imgsz 640 "
     cmd += "--save-txt "
