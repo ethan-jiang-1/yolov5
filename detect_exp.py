@@ -234,7 +234,7 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
                         #ethan add / modify 7
                         #annotator.box_label(xyxy, label, color=colors(c, True))
                         if not has_object_tracking():
-                            annotator_box_label_exp(annotator, xyxy, label, color=colors(c, True), save_dir=(save_dir if save_txt else None))
+                            annotator_box_label_exp(annotator, xyxy, label, color=colors(c, True), save_dir=(save_dir if save_txt else None), conf=conf)
 
                         if save_crop:
                             save_one_box(xyxy, imc, file=save_dir / 'crops' / names[c] / f'{p.stem}.jpg', BGR=True)

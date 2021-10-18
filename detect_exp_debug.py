@@ -82,7 +82,7 @@ def _makeup_argv():
     cmd = "detect_exp.py "
    
     cmd += "--imgsz 640 "
-    cmd += "--save-txt "
+    #cmd += "--save-txt "
 
     cmd += "--conf-thres 0.40 "
 
