@@ -46,11 +46,11 @@ def _is_object_irregular(annotator, xyxy):
     dx = abs(xyxy[0] - xyxy[2])
     dy = abs(xyxy[1] - xyxy[3])
 
-    if (dx < 48) or(dy < 48):
+    if (dx < 48) or (dy < 48):
         return "Size(dx:{} dy:{}".format(dx, dy) 
 
     hw_ratio = max(dx/dy, dy/dx) 
-    if (hw_ratio >  2):
+    if (hw_ratio > 2):
         return "HwRatio(ratio:{})".format(hw_ratio)
 
     return None
@@ -58,7 +58,7 @@ def _is_object_irregular(annotator, xyxy):
 def annotator_box_label_exp(annotator, xyxy, label, color=None):
     reason = _is_object_irregular(annotator, xyxy) 
     if reason is not None and not get_control_flag("FLAG_LABEL_IRREGULAR"):
-        print(color("yellow", "filter out irregular object {} {} reason: {}".format(label, xyxy, reason)))
+        print(colorstr("yellow", "filter out irregular object {} {} reason: {}".format(label, xyxy, reason)))
         return
 
     reason = None
@@ -75,7 +75,7 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
     if label is not None:
         annotator.box_label(xyxy, label, color)
     else:
-        print(color("yellow", "filter out object {} {} reason: {}".format(label, xyxy, reason)))
+        print(colorstr("yellow", "filter out normal object {} {} reason: {}".format(label, xyxy, reason)))
 
 
 def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=None, extra=None):
