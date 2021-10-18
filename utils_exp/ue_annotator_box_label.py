@@ -62,10 +62,15 @@ def _is_object_irregular(annotator, np_xyxy, ot_type):
     dx = abs(np_xyxy[0] - np_xyxy[2])
     dy = abs(np_xyxy[1] - np_xyxy[3])
 
-    if (dx < 48) or (dy < 48):
+    if (dx < 36) or (dy < 36):
         if ot_type == "OtBack":
-            return "SizeBk({}/{}".format(dx, dy) 
-        return "SizeNm({}/{})".format(dx, dy) 
+            return "BorderBk({}/{}".format(dx, dy) 
+        return "BorderNm({}/{})".format(dx, dy) 
+
+    if (dx * dy < 24 * 24):
+        if ot_type == "OtBack":
+            return "AreaBk({}/{}/{}".format(dx, dy, dx * dy) 
+        return "AreaNm({}/{}/{})".format(dx, dy, dx * dy)        
 
     hw_ratio = max(dx/dy, dy/dx) 
     if (hw_ratio > 2):
