@@ -53,7 +53,6 @@ from utils.callbacks import Callbacks
 #ethan add 1
 from utils_exp.ue_interrupt_signal import InterruptSignal, signal
 
-
 def has_stop_signal_received():
     if InterruptSignal.get_received_signal() == signal.SIGUSR1:
         print("Early stopping: received interrupt signal", InterruptSignal.get_received_signal())
@@ -450,7 +449,7 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         LOGGER.info(f'\n{epoch - start_epoch + 1} epochs completed in {(time.time() - t0) / 3600:.3f} hours.')
         for f in last, best:
             if f.exists():
-                # ethan add 8
+                # ethan add 8: only strop optimizer for normal run
                 if not has_stop_signal_received():
                     strip_optimizer(f)  # strip optimizers
 
