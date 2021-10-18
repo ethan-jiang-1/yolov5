@@ -449,7 +449,10 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
         LOGGER.info(f'\n{epoch - start_epoch + 1} epochs completed in {(time.time() - t0) / 3600:.3f} hours.')
         for f in last, best:
             if f.exists():
-                strip_optimizer(f)  # strip optimizers
+                # ethan add 8: only strop optimizer for normal run
+                if not has_stop_signal_received():
+                    strip_optimizer(f)  # strip optimizers
+
                 if f is best:
                     LOGGER.info(f'\nValidating {f}...')
                     results, _, _ = val.run(data_dict,
@@ -465,12 +468,6 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                                             plots=True,
                                             callbacks=callbacks,
                                             compute_loss=compute_loss)  # val best model with plots
-
-        #ethan add 8: hack, if we stop the training for unknown reason we will end up wrong best/stripped model in wandb
-        if has_stop_signal_received():
-            if loggers.wandb is not None:
-                loggers.wandb.finish_run()
-                loggers.wandb = None
 
         callbacks.run('on_train_end', last, best, plots, epoch)
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}")
