@@ -8,9 +8,9 @@ s_control_names = {
     "FLAG_ADD_PADDING_TO_2ND_CLASSIFIER": False,
 
     "FLAG_SHORTEN_LABEL": False,
-    "FLAG_LABEL_BK": True,
-    "FLAG_LABEL_HAND": True,
-    "FLAG_LABEL_SMALL": True,
+    "FLAG_LABEL_BK": False,
+    "FLAG_LABEL_HAND": False,
+    "FLAG_LABEL_IRREGULAR": False,
     
     "FLAG_OBJECT_TRACKING": False,
     "FLAG_ENABLE_DUMP_TRACK_IMGS": False}
