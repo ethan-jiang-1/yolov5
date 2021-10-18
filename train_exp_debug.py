@@ -51,10 +51,15 @@ def _update_data_all_yaml():
         f.writelines(CONTENT_DATA_ALL_YAML)
     return data_all_yaml_path
 
+def _make_cached_type():
+    #os.environ["MIXED_COMPRESS_PARAMS"] = ".jpg:90"
+    os.environ["MIXED_COMPRESS_PARAMS"] = ".png:3"
+    return "mixed" # "ram"
+
 def _makeup_argv():
     epochs = 10
     img_size = 640
-    cache_type = "mixed" # "ram"
+    cache_type = _make_cached_type()
 
     batch_size = 24
 

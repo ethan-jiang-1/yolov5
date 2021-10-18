@@ -495,6 +495,23 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             if self.mixed_cached:
                 return
 
+        encode_format, encode_param = '.jpg', [int(cv2.IMWRITE_JPEG_QUALITY), 95]   # the default jpg compression is 95
+        #encode_format, encode_param = '.png', [int(cv2.IMWRITE_PNG_COMPRESSION), 3]  # the default png compression is 3
+        encode_mixed_params = ""
+        if "MIXED_COMPRESS_PARAMS" in os.environ:
+            encode_mixed_params = os.environ["MIXED_COMPRESS_PARAMS"]
+            names = encode_mixed_params.split(":")
+            format_name = names[0]
+            compress_num = int(names[1])
+            if format_name == ".jpg" and (compress_num >= 5 and compress_num <= 100):  # 5~100: the higher the number, the larger the compressed result
+                encode_format = format_name
+                encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), compress_num]
+            elif format_name == ".png" and (compress_num >= 0 and compress_num <= 9):  # 0~9: the higher the number, the smaller the compressed result
+                encode_format = names[0]
+                encode_param = [int(cv2.IMWRITE_PNG_COMPRESSION), compress_num]
+            print("MIXED_COMPRESS_PARAMS", encode_mixed_params)
+        print("mixed cache: encode params", encode_format, encode_param)
+
         cache_images = "mixed"
         gb = 0  # Gigabytes of cached images
         gbenc = 0
@@ -507,8 +524,8 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
             #self.imgs[i] = im
             
             gb += im.nbytes
-            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
-            _, encimg = cv2.imencode('.jpg', im, encode_param)
+            #encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+            _, encimg = cv2.imencode(encode_format, im, encode_param)
             self.imgs_enc[i] = encimg
             gbenc += len(encimg)
 
@@ -526,7 +543,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
     # ethan add 4:
     def hkmc_load_image_from_mixed_cached(self, i):
         encimg = self.imgs_enc[i]
-        decimg = cv2.imdecode(encimg, 1)
+        decimg = cv2.imdecode(encimg, cv2.IMREAD_COLOR) # BGR
         return decimg, self.img_hw0[i], self.img_hw[i] 
 
     def cache_labels(self, path=Path('./labels.cache'), prefix=''):
