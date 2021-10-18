@@ -327,6 +327,18 @@ class DetectionTracker(object):
                 fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=img, extra=extra)
 
 
+def dump_tracking_info():
+    print("ue_detection_tracker info:")
+
+    print("TRACK_AVE_WEIGHT_DECAY_ENABLE\t", TRACK_AVE_WEIGHT_DECAY_ENABLE)
+    print("TRACK_AVE_WEIGHT_DECAY_CAP\t", TRACK_AVE_WEIGHT_DECAY_CAP)
+    print("TRACK_AVE_WEIGHT_DECAY_STEP\t", TRACK_AVE_WEIGHT_DECAY_STEP)
+
+    print("MAX_DISAPPEARED\t", MAX_DISAPPEARED)
+    print("MAX_QUEUE_LEN  \t", MAX_QUEUE_LEN)
+    print()
+
+
 def _get_txt_img_names(tracking_txt_dir, tracking_img_dir):
     tracking_txt_dir = os.path.abspath(tracking_txt_dir)
     names = os.listdir(tracking_txt_dir)

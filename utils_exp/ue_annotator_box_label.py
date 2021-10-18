@@ -26,6 +26,8 @@ extend_sys_paths()
 from utils_exp.ue_control import set_control_flag, get_control_flag
 from utils_exp.ue_detection_tracker import DetectionTracker
 from utils.plots import colors
+from utils.general import colorstr
+from utils_exp.ue_detection_tracker import dump_tracking_info
 
 
 def has_object_tracking():
@@ -94,7 +96,8 @@ def track_detections_exp(annotator, detections, names):
             ch, cw = im.shape[0], im.shape[1]
             s_dtt = DetectionTracker(ch, cw, names)
             s_names = names
-            print("track_detection_exp kicked...")
+            print(colorstr("blue", "\ntrack_detection_exp kicked...\n"))
+            dump_tracking_info()
 
     if s_dtt is None:
         return
