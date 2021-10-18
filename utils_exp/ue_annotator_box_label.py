@@ -43,8 +43,11 @@ def enable_dump_track_imgs(enable_disable):
     return set_control_flag("FLAG_ENABLE_DUMP_TRACK_IMGS", enable_disable)
 
 def _is_object_irregular(annotator, xyxy):
-    dx = abs(xyxy[0] - xyxy[2])
-    dy = abs(xyxy[1] - xyxy[3])
+    np_xyxy = xyxy
+    if hasattr(np_xyxy, "cpu"):
+        np_xyxy = np_xyxy.cpu().detach().numpy()
+    dx = abs(np_xyxy[0] - np_xyxy[2])
+    dy = abs(np_xyxy[1] - np_xyxy[3])
 
     if (dx < 48) or (dy < 48):
         return "Size(dx:{} dy:{}".format(dx, dy) 
