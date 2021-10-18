@@ -94,6 +94,7 @@ def track_detections_exp(annotator, detections, names):
             ch, cw = im.shape[0], im.shape[1]
             s_dtt = DetectionTracker(ch, cw, names)
             s_names = names
+            print("track_detection_exp kicked...")
 
     if s_dtt is None:
         return
