@@ -313,7 +313,7 @@ class DetectionTracker(object):
         txywh = (int(tx/total_weight), int(ty/total_weight), int(tw/total_weight), int(th/total_weight))
         return txywh
 
-    def draw_traced_detections(self, detections, fun_draw_tracked_fun=None, img=None, extra=None):
+    def draw_traced_detections(self, detections, fun_draw_tracked_fun=None, img=None, extra=None, save_dir=None):
         # detections array of [obj_klx, x, y, w, h, conf]
         rect_klxs, tracks = self.feed_detects(detections)
 
@@ -324,7 +324,7 @@ class DetectionTracker(object):
             avg_xywh = self.get_tracked_txywh(objectID)
 
             if fun_draw_tracked_fun is not None:
-                fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=img, extra=extra)
+                fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=img, extra=extra, save_dir=save_dir)
 
 
 def dump_tracking_info():

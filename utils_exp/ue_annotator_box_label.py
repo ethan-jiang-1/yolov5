@@ -73,14 +73,21 @@ def _is_object_irregular(annotator, np_xyxy, ot_type):
 
     return None
 
-def annotator_box_label_exp(annotator, xyxy, label, color=None):
+def _log_save_dir(save_dir, msg):
+    if save_dir is None:
+        return
+
+    txt_path = save_dir / "anno_tracking.txt"
+    with open(txt_path, 'a') as f:
+        f.write(msg + '\n')    
+
+def annotator_box_label_exp(annotator, xyxy, label, color=None, save_dir=None):
     np_xyxy = _get_numpy_xyxy(xyxy)
     ot_type = _get_obj_type(label)
 
     reason = _is_object_irregular(annotator, np_xyxy, ot_type) 
     if reason is not None and not get_control_flag("FLAG_LABEL_IRREGULAR"):
-        print(colorstr("yellow", "filter out irregular object {} {} reason: {}".format(label, np_xyxy, reason)))
-        return
+        _log_save_dir(save_dir, "filter out irregular object {} {} reason: {}".format(label, np_xyxy, reason))
 
     reason = None
     if label is not None:
@@ -96,10 +103,10 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
     if label is not None:
         annotator.box_label(xyxy, label, color)
     else:
-        print(colorstr("yellow", "filter out normal object {} {} reason: {}".format(label, np_xyxy, reason)))
+        _log_save_dir(save_dir, "filter out normal object {} {} reason: {}".format(label, np_xyxy, reason))
 
 
-def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=None, extra=None):
+def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=None, extra=None, save_dir=None):
     frame = img
     if frame is None:
         return 
@@ -121,12 +128,12 @@ def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=No
     x, y, w, h = avg_xywh
     box = (int(x - 0.5 * w), int(y - 0.5 * h), int(x + 0.5 * w), int(y + 0.5 * h))
     # annotator.box_label(box, label=label, color=color_box, txt_color=color_txt)
-    annotator_box_label_exp(annotator, box, label, color=color_box)
+    annotator_box_label_exp(annotator, box, label, color=color_box, save_dir=save_dir)
 
 
 s_dtt = None
 s_names = None
-def track_detections_exp(annotator, detections, names):
+def track_detections_exp(annotator, detections, names, save_dir=None):
     global s_dtt
     global s_names
     im = annotator.im
@@ -141,7 +148,7 @@ def track_detections_exp(annotator, detections, names):
     if s_dtt is None:
         return
     
-    s_dtt.draw_traced_detections(detections, fun_draw_tracked_fun=_fun_draw_tracked_fun, img=im, extra=annotator)
+    s_dtt.draw_traced_detections(detections, fun_draw_tracked_fun=_fun_draw_tracked_fun, img=im, extra=annotator, save_dir=save_dir)
     
 
 s_track_count = 0
