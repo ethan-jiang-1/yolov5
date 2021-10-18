@@ -7,7 +7,7 @@ s_control_names = {
     "FLAG_HOOK_REAL_2ND_CLASSIFIER": False,
     "FLAG_ADD_PADDING_TO_2ND_CLASSIFIER": False,
 
-    "FLAG_SHORTEN_LABEL": True,
+    "FLAG_SHORTEN_LABEL": False,
     "FLAG_LABEL_BK": True,
     "FLAG_LABEL_HAND": True,
     "FLAG_LABEL_SMALL": True,

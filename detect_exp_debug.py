@@ -26,10 +26,10 @@ from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_img
 from utils_exp.ue_annotator_box_label import enable_object_trackig  # , enable_dump_track_imgs
 
 OD_2ND_CLASSIFIER = False
-OD_MODEL_TYPE = "m"
+OD_MODEL_TYPE = "s"
 OD_TRACKING_SAMPLE = True
 
-OD_SOURCE_TYPE = "mp4"  # "webcam", "image", "mp4", "mp4jpg"
+OD_SOURCE_TYPE = "mp4"  # ,  "images_tracking" #"mp4"  # "webcam", "image", "mp4", "mp4jpg"
 
 
 def _get_label_params():
@@ -37,7 +37,7 @@ def _get_label_params():
     if OD_TRACKING_SAMPLE:
         cmd += "--hide-conf "
         cmd += "--hide-labels "
-        cmd += "--line-thickness 1 "
+        cmd += "--line-thickness 2 "
     else:
         cmd += "--line-thickness 2 "
     return cmd
@@ -60,12 +60,14 @@ def _get_source():
         source = "0"  # webcam usb
         #source = "1"  # webcam screen
     elif OD_SOURCE_TYPE == "mp4":
-        #source = "../ds_yolov5_exam/exam_tracking/video_0/track_0.mp4"
-        source = "../ds_yolov5_exam/exam_tracking/video_a/track_a.mp4"
+        source = "../ds_yolov5_exam/exam_tracking/video_0/track_0.mp4"
+        #source = "../ds_yolov5_exam/exam_tracking/video_a/track_a.mp4"
     elif OD_SOURCE_TYPE == "mp4jpg":
         source = "../dx_mp4_jpg"
     elif OD_SOURCE_TYPE == "image":
-        source = "/ds_yolov5_exam/exam_tracking/tracking_0"
+        source = "../ds_yolov5_exam/exam_tracking/images_group_0"
+    elif OD_SOURCE_TYPE == "images_tracking":
+        source = "../ds_yolov5_exam/exam_tracking/images_group_0"
     else:
         raise ValueError("not-support")
 
@@ -114,7 +116,7 @@ def _prepare_env():
         enable_classifier(True)
         enable_dump_corp_imgs(True)
 
-    if OD_SOURCE_TYPE in ["mp4", "mp4jpg"]:
+    if OD_SOURCE_TYPE in ["mp4", "mp4jpg", "images_tracking"]:
         enable_object_trackig(True)
         #enable_dump_track_imgs(True)
 

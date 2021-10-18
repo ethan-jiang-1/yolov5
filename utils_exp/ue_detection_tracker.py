@@ -10,12 +10,15 @@ from collections import deque
 
 ObjTrack = namedtuple("ObjTrack", ["centroid", "obj_klx", "conf", "rect", "area"])
 
+TRACK_AVE_WEIGHT_DECAY_ENABLE = True
+TRACK_AVE_WEIGHT_DECAY_CAP = 1    # (0-1) the higher the more decline
+TRACK_AVE_WEIGHT_DECAY_STEP = 0.8  # (0-1) the higher the more decrese per step
 
-TRACK_AVE_WEIGHT_DECAY = 10  # the higher the smother
-
+MAX_DISAPPEARED = 100 # 50
+MAX_QUEUE_LEN = 6
 
 class CentroidTracker():
-    def __init__(self, maxDisappeared=50):
+    def __init__(self, maxDisappeared=MAX_DISAPPEARED):
         # initialize the next unique object ID along with two ordered
         # dictionaries used to keep track of mapping a given object
         # ID to its centroid and number of consecutive frames it has
@@ -169,7 +172,7 @@ class CentroidTracker():
 
 
 class DetectionTracker(object):
-    def __init__(self, ch, cw, klx_names, maxDisappeared=100, maxQueueLen=5):
+    def __init__(self, ch, cw, klx_names, maxDisappeared=MAX_DISAPPEARED, maxQueueLen=MAX_QUEUE_LEN):
         self.maxDisappeared = maxDisappeared
         self.maxQueueLen = maxQueueLen
         self.ch = ch
@@ -282,18 +285,30 @@ class DetectionTracker(object):
             return None
         elif len(xywhs) == 1:
             return xywhs[0]
+        
+        if not TRACK_AVE_WEIGHT_DECAY_ENABLE:
+            return xywhs[0]
 
         total_weight = 0
         tx, ty, tw, th = 0, 0, 0, 0
-        for i in range(len(xywhs)):
+        len_xywhs = len(xywhs)
+        #weights = []
+        for i in range(len_xywhs):
             x, y, w, h = xywhs[i]
 
-            weight = (1 - (1 / self.maxQueueLen * i) / TRACK_AVE_WEIGHT_DECAY)
-            total_weight += weight
-            tx += x * weight
-            ty += y * weight
-            tw += w * weight 
-            th += h * weight 
+            if i == 0:
+                weight = 1.0
+            else:
+                weight = 1.0 - (TRACK_AVE_WEIGHT_DECAY_CAP / self.maxQueueLen) * i * TRACK_AVE_WEIGHT_DECAY_STEP
+    
+            if weight > 0:
+                total_weight += weight
+                tx += x * weight
+                ty += y * weight
+                tw += w * weight 
+                th += h * weight 
+                #weights.append(weight)
+        #print(weights)
 
         txywh = (int(tx/total_weight), int(ty/total_weight), int(tw/total_weight), int(th/total_weight))
         return txywh
