@@ -60,8 +60,9 @@ def _get_source():
         source = "0"  # webcam usb
         #source = "1"  # webcam screen
     elif OD_SOURCE_TYPE == "mp4":
-        source = "../ds_yolov5_exam/exam_tracking/video_0/track_0.mp4"
+        #source = "../ds_yolov5_exam/exam_tracking/video_0/track_0.mp4"
         #source = "../ds_yolov5_exam/exam_tracking/video_a/track_a.mp4"
+        source = "../dt_ds_example/video01.mp4"
     elif OD_SOURCE_TYPE == "mp4jpg":
         source = "../dx_mp4_jpg"
     elif OD_SOURCE_TYPE == "image":

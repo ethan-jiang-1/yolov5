@@ -42,34 +42,52 @@ def need_dump_tracking_imgs():
 def enable_dump_track_imgs(enable_disable):
     return set_control_flag("FLAG_ENABLE_DUMP_TRACK_IMGS", enable_disable)
 
-def _is_object_irregular(annotator, xyxy):
+def _get_obj_type(label):
+    if label is not None:
+        if label.find("HBU02-BK") != -1:
+            return "OtBack"
+        elif label.find("hand") != -1:
+            return "OtHand"
+        return "OtUnlabel"
+    return "OtLabeld"
+            
+
+def _get_numpy_xyxy(xyxy):
     np_xyxy = xyxy
-    if hasattr(np_xyxy, "cpu"):
-        np_xyxy = np_xyxy.cpu().detach().numpy()
+    if hasattr(np_xyxy, "detach"):
+        np_xyxy = np_xyxy.detach().cpu().numpy()   
+    return np_xyxy
+
+def _is_object_irregular(annotator, np_xyxy, ot_type):
     dx = abs(np_xyxy[0] - np_xyxy[2])
     dy = abs(np_xyxy[1] - np_xyxy[3])
 
     if (dx < 48) or (dy < 48):
-        return "Size(dx:{} dy:{}".format(dx, dy) 
+        if ot_type == "OtBack":
+            return "SizeBk({}/{}".format(dx, dy) 
+        return "SizeNm({}/{})".format(dx, dy) 
 
     hw_ratio = max(dx/dy, dy/dx) 
     if (hw_ratio > 2):
-        return "HwRatio(ratio:{})".format(hw_ratio)
+        return "HwRatio({})".format(hw_ratio)
 
     return None
 
 def annotator_box_label_exp(annotator, xyxy, label, color=None):
-    reason = _is_object_irregular(annotator, xyxy) 
+    np_xyxy = _get_numpy_xyxy(xyxy)
+    ot_type = _get_obj_type(label)
+
+    reason = _is_object_irregular(annotator, np_xyxy, ot_type) 
     if reason is not None and not get_control_flag("FLAG_LABEL_IRREGULAR"):
-        print(colorstr("yellow", "filter out irregular object {} {} reason: {}".format(label, xyxy, reason)))
+        print(colorstr("yellow", "filter out irregular object {} {} reason: {}".format(label, np_xyxy, reason)))
         return
 
     reason = None
     if label is not None:
-        if label.find("BK") != -1 and not get_control_flag("FLAG_LABEL_BK"):
+        if ot_type == "OtBack" and not get_control_flag("FLAG_LABEL_BK"):
             label = None
             reason = "FLAG_LABEL_BK:{}".format(get_control_flag("FLAG_LABEL_BK"))
-        elif label.find("hand") != -1 and not get_control_flag("FLAG_LABEL_HAND"):
+        elif ot_type == "OtHand" and not get_control_flag("FLAG_LABEL_HAND"):
             label = None
             reason = "FLAG_LABEL_HAND:{}".format(get_control_flag("FLAG_LABEL_HAND"))
         elif label.find("HBU") != -1 and get_control_flag("FLAG_SHORTEN_LABEL"):
@@ -78,7 +96,7 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None):
     if label is not None:
         annotator.box_label(xyxy, label, color)
     else:
-        print(colorstr("yellow", "filter out normal object {} {} reason: {}".format(label, xyxy, reason)))
+        print(colorstr("yellow", "filter out normal object {} {} reason: {}".format(label, np_xyxy, reason)))
 
 
 def _fun_draw_tracked_fun(objectID, track_found, centroid, klx, avg_xywh, img=None, extra=None):
