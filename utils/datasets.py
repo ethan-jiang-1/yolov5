@@ -497,24 +497,37 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
         cache_images = "mixed"
         gb = 0  # Gigabytes of cached images
+        gbenc = 0
         self.img_hw0, self.img_hw = [None] * n, [None] * n
+        self.imgs_enc = [None] * n
         results = ThreadPool(NUM_THREADS).imap(lambda x: load_image(*x), zip(repeat(self), range(n)))
         pbar = tqdm(enumerate(results), total=n)
         for i, x in pbar:
-            self.imgs[i], self.img_hw0[i], self.img_hw[i] = x  # im, hw_orig, hw_resized = load_image(self, i)
-            gb += self.imgs[i].nbytes
-            pbar.desc = f'{prefix}Caching images ({gb / 1E9:.1f}GB {cache_images})'
+            im, self.img_hw0[i], self.img_hw[i] = x  # im, hw_orig, hw_resized = load_image(self, i)
+            #self.imgs[i] = im
+            
+            gb += im.nbytes
+            encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+            _, encimg = cv2.imencode('.jpg', im, encode_param)
+            self.imgs_enc[i] = encimg
+            gbenc += len(encimg)
+
+            pbar.desc = f'{prefix}Caching images ({gb / 1E9:.1f}GB / {gbenc / 1E9:.1f}GB {cache_images})'
         pbar.close()
+        self.mixed_cached = True
 
     # ethan add 3: 
     def hkmc_if_mixed_cached(self):
         if hasattr(self, "mixed_cached"):
-            return self.mixed_cached
+            if self.mixed_cached:
+                return True
         return False
 
     # ethan add 4:
-    def hkmc_load_image_from_mixed_cached(self):
-        return None
+    def hkmc_load_image_from_mixed_cached(self, i):
+        encimg = self.imgs_enc[i]
+        decimg = cv2.imdecode(encimg, 1)
+        return decimg, self.img_hw0[i], self.img_hw[i] 
 
     def cache_labels(self, path=Path('./labels.cache'), prefix=''):
         # Cache dataset labels, check images and read shapes
