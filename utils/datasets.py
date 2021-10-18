@@ -496,7 +496,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 return
 
         encode_format, encode_param = '.jpg', [int(cv2.IMWRITE_JPEG_QUALITY), 95]   # the default jpg compression is 95
-        encode_format, encode_param = '.webp', [int(cv2.IMWRITE_WEBP_QUALITY), 95]  # the default webp compression is 95
+        #encode_format, encode_param = '.webp', [int(cv2.IMWRITE_WEBP_QUALITY), 95]  # the default webp compression is 95
         encode_mixed_params = ""
         env_key = "MIXED_COMPRESS_PARAMS"
         if env_key in os.environ:
