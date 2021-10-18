@@ -23,7 +23,7 @@ extend_sys_paths()
 
 from detect_exp import parse_opt, main, ROOT 
 from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
-from utils_exp.ue_annotator_box_label import enable_object_trackig  # , enable_dump_track_imgs
+from utils_exp.ue_annotator_box_label import enable_object_tracking  # , enable_dump_track_imgs
 
 OD_2ND_CLASSIFIER = False
 OD_MODEL_TYPE = "s"
@@ -117,7 +117,7 @@ def _prepare_env():
         enable_dump_corp_imgs(True)
 
     if OD_SOURCE_TYPE in ["mp4", "mp4jpg", "images_tracking"]:
-        enable_object_trackig(True)
+        enable_object_tracking(True)
         #enable_dump_track_imgs(True)
 
 def do_detect_exp():

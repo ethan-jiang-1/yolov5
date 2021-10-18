@@ -33,7 +33,7 @@ from utils_exp.ue_detection_tracker import dump_tracking_info
 def has_object_tracking():
     return get_control_flag("FLAG_OBJECT_TRACKING")
 
-def enable_object_trackig(enable_disable):
+def enable_object_tracking(enable_disable):
     return set_control_flag("FLAG_OBJECT_TRACKING", enable_disable)
 
 def need_dump_tracking_imgs():
