@@ -55,7 +55,7 @@ def _update_data_all_yaml():
 def _makeup_argv():
     epochs = 10
     img_size = 640
-    cache_type = "ram"
+    cache_type = "mixed" #"ram"
 
     batch_size = 24
 

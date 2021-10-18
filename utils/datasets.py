@@ -466,6 +466,10 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         # Cache images into memory for faster training (WARNING: large datasets may exceed system RAM)
         self.imgs, self.img_npy = [None] * n, [None] * n
         if cache_images:
+            # ethan add 1: hack mixed cache
+            if cache_images == "mixed":
+                return self.hkmc_build_mixed_cache(n, prefix)
+
             if cache_images == 'disk':
                 self.im_cache_dir = Path(Path(self.img_files[0]).parent.as_posix() + '_npy')
                 self.img_npy = [self.im_cache_dir / Path(f).with_suffix('.npy').name for f in self.img_files]
@@ -484,6 +488,33 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                     gb += self.imgs[i].nbytes
                 pbar.desc = f'{prefix}Caching images ({gb / 1E9:.1f}GB {cache_images})'
             pbar.close()
+
+    # ethan add 2: hack mixed cache
+    def hkmc_build_mixed_cache(self, n, prefix):
+        if hasattr(self, "mixed_cached"):
+            if self.mixed_cached:
+                return
+
+        cache_images = "mixed"
+        gb = 0  # Gigabytes of cached images
+        self.img_hw0, self.img_hw = [None] * n, [None] * n
+        results = ThreadPool(NUM_THREADS).imap(lambda x: load_image(*x), zip(repeat(self), range(n)))
+        pbar = tqdm(enumerate(results), total=n)
+        for i, x in pbar:
+            self.imgs[i], self.img_hw0[i], self.img_hw[i] = x  # im, hw_orig, hw_resized = load_image(self, i)
+            gb += self.imgs[i].nbytes
+            pbar.desc = f'{prefix}Caching images ({gb / 1E9:.1f}GB {cache_images})'
+        pbar.close()
+
+    # ethan add 3: 
+    def hkmc_if_mixed_cached(self):
+        if hasattr(self, "mixed_cached"):
+            return self.mixed_cached
+        return False
+
+    # ethan add 4:
+    def hkmc_load_image_from_mixed_cached(self):
+        return None
 
     def cache_labels(self, path=Path('./labels.cache'), prefix=''):
         # Cache dataset labels, check images and read shapes
@@ -638,6 +669,9 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
 # Ancillary functions --------------------------------------------------------------------------------------------------
 def load_image(self, i):
+    if self.hkmc_if_mixed_cached():
+        return self.hkmc_load_image_from_mixed_cached(i)
+
     # loads 1 image from dataset index 'i', returns im, original hw, resized hw
     im = self.imgs[i]
     if im is None:  # not cached in ram
