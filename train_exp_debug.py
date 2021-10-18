@@ -52,8 +52,8 @@ def _update_data_all_yaml():
     return data_all_yaml_path
 
 def _make_cached_type():
-    #os.environ["MIXED_COMPRESS_PARAMS"] = ".jpg:90"
-    os.environ["MIXED_COMPRESS_PARAMS"] = ".png:3"
+    os.environ["MIXED_COMPRESS_PARAMS"] = ".jpg:90"
+    #os.environ["MIXED_COMPRESS_PARAMS"] = ".png:3"
     return "mixed" # "ram"
 
 def _makeup_argv():
