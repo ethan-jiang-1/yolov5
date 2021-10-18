@@ -496,20 +496,24 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 return
 
         encode_format, encode_param = '.jpg', [int(cv2.IMWRITE_JPEG_QUALITY), 95]   # the default jpg compression is 95
-        #encode_format, encode_param = '.png', [int(cv2.IMWRITE_PNG_COMPRESSION), 3]  # the default png compression is 3
+        encode_format, encode_param = '.webp', [int(cv2.IMWRITE_WEBP_QUALITY), 95]  # the default webp compression is 95
         encode_mixed_params = ""
-        if "MIXED_COMPRESS_PARAMS" in os.environ:
-            encode_mixed_params = os.environ["MIXED_COMPRESS_PARAMS"]
+        env_key = "MIXED_COMPRESS_PARAMS"
+        if env_key in os.environ:
+            encode_mixed_params = os.environ[env_key]
             names = encode_mixed_params.split(":")
             format_name = names[0]
             compress_num = int(names[1])
             if format_name == ".jpg" and (compress_num >= 5 and compress_num <= 100):  # 5~100: the higher the number, the larger the compressed result
                 encode_format = format_name
                 encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), compress_num]
-            elif format_name == ".png" and (compress_num >= 0 and compress_num <= 9):  # 0~9: the higher the number, the smaller the compressed result
+                print(env_key, encode_mixed_params)
+            elif format_name == ".webp" and (compress_num >= 5 and compress_num <= 100):  # 5~100: the higher the number, the larger the compressed result
                 encode_format = names[0]
-                encode_param = [int(cv2.IMWRITE_PNG_COMPRESSION), compress_num]
-            print("MIXED_COMPRESS_PARAMS", encode_mixed_params)
+                encode_param = [int(cv2.IMWRITE_WEBP_QUALITY), compress_num]
+                print(env_key, encode_mixed_params)
+            else:
+                print(env_key, "not supported parameters:", encode_mixed_params)
         print("mixed cache: encode params", encode_format, encode_param)
 
         cache_images = "mixed"
