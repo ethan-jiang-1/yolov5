@@ -466,7 +466,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         # Cache images into memory for faster training (WARNING: large datasets may exceed system RAM)
         self.imgs, self.img_npy = [None] * n, [None] * n
         if cache_images:
-            # ethan add 1: hack mixed cache
+            # ethan add 1: hack to hook the mixed mode
             if cache_images == "mixed":
                 return self.hkmc_build_mixed_cache(n, prefix)
 
@@ -682,6 +682,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
 # Ancillary functions --------------------------------------------------------------------------------------------------
 def load_image(self, i):
+    #ethan add 5: hack to hook the mixed mode
     if self.hkmc_if_mixed_cached():
         return self.hkmc_load_image_from_mixed_cached(i)
 
@@ -770,6 +771,8 @@ def load_mosaic9(self, index):
     s = self.img_size
     indices = [index] + random.choices(self.indices, k=8)  # 8 additional image indices
     random.shuffle(indices)
+    #ethan add 0: avoid flake8 warning
+    hp, wp = 0, 0 # avoid flake8 warning
     for i, index in enumerate(indices):
         # Load image
         img, _, (h, w) = load_image(self, index)

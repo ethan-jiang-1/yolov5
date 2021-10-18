@@ -32,7 +32,7 @@ names: ['HBU02-A34', 'HBU02-A37', 'HBU02-A42', 'HBU02-A27', 'HBU02-A28', 'HBU02-
 """
 
 
-from utils.loggers import LOGGERS
+# from utils.loggers import LOGGERS
 from train_exp import parse_opt, main, ROOT 
 
 
@@ -42,9 +42,8 @@ def _prepare_env():
     dir_yolov5 = os.path.dirname(__file__)
     os.chdir(dir_yolov5)
 
-    #global LOGGERS
-    #LOGGERS = ('csv')
-
+    # global LOGGERS
+    # LOGGERS = ('csv')
 
 def _update_data_all_yaml():
     data_all_yaml_path = "../data_all.yaml"
@@ -55,7 +54,7 @@ def _update_data_all_yaml():
 def _makeup_argv():
     epochs = 10
     img_size = 640
-    cache_type = "mixed" #"ram"
+    cache_type = "mixed" # "ram"
 
     batch_size = 24
 
