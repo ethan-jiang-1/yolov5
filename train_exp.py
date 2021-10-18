@@ -466,6 +466,12 @@ def train(hyp,  # path/to/hyp.yaml or hyp dictionary
                                             callbacks=callbacks,
                                             compute_loss=compute_loss)  # val best model with plots
 
+        #ethan add 8: hack, if we stop the training for unknown reason we will end up wrong best/stripped model in wandb
+        if has_stop_signal_received():
+            if loggers.wandb is not None:
+                loggers.wandb.finish_run()
+                loggers.wandb = None
+
         callbacks.run('on_train_end', last, best, plots, epoch)
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}")
 
