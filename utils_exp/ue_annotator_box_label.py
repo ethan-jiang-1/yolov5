@@ -58,39 +58,53 @@ def _get_numpy_xyxy(xyxy):
         np_xyxy = np_xyxy.detach().cpu().numpy()   
     return np_xyxy
 
+def _get_irregular_params():
+    conf_thres = 0.8
+
+    lc_min_hw = 48
+    lc_min_area = 36 * 36
+    lc_max_hw_ratio = 2
+
+    hc_min_hw = 36
+    hc_min_area = 24 * 24
+    hc_max_hw_ratio = 1.6
+
+    return conf_thres, lc_min_hw, lc_min_area, lc_max_hw_ratio, hc_min_hw, hc_min_area, hc_max_hw_ratio
+
 def _is_object_irregular(annotator, np_xyxy, ot_type, label, conf):
     dx = abs(np_xyxy[0] - np_xyxy[2])
     dy = abs(np_xyxy[1] - np_xyxy[3])
 
-    if conf < 0.8:
-        if (dx < 36) or (dy < 36):
+    conf_thres, lc_min_hw, lc_min_area, lc_max_hw_ratio, hc_min_hw, hc_min_area, hc_max_hw_ratio = _get_irregular_params()
+    if conf < conf_thres:
+        if (dx < lc_min_hw) or (dy < lc_min_hw):
             if ot_type == "OtBack":
                 return "BorderBk({}/{}".format(dx, dy) 
             return "BorderNm({}/{})".format(dx, dy) 
 
-        if (dx * dy < 36 * 36):
+        if (dx * dy < lc_min_area):
             if ot_type == "OtBack":
                 return "AreaBk({}/{}/{}".format(dx, dy, dx * dy) 
             return "AreaNm({}/{}/{})".format(dx, dy, dx * dy)        
 
         hw_ratio = max(dx/dy, dy/dx) 
-        if (hw_ratio > 2):
+        if (hw_ratio > lc_max_hw_ratio):
             if ot_type == "OtBack":
                 return "HwRatioBk({})".format(hw_ratio)
             return "HwRatioNm({})".format(hw_ratio)
     else:
-        if (dx < 48) or (dy < 48):        
+        if (dx < hc_min_hw) or (dy < hc_min_hw):        
             if ot_type == "OtBack":
                 return "BorderHcBk({}/{}".format(dx, dy) 
             return "BorderHcNm({}/{})".format(dx, dy) 
 
-        if (dx * dy < 48 * 48):
+        if (dx * dy < hc_min_area):
             if ot_type == "OtBack":
                 return "AreaHcBk({}/{}/{}".format(dx, dy, dx * dy) 
             return "AreaHcNm({}/{}/{})".format(dx, dy, dx * dy)        
 
         hw_ratio = max(dx/dy, dy/dx) 
-        if (hw_ratio > 3):
+        if (hw_ratio > hc_max_hw_ratio):
             if ot_type == "OtBack":
                 return "HwRatioHcBk({})".format(hw_ratio)
             return "HwRatioHcNm({})".format(hw_ratio)
@@ -110,8 +124,12 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None, save_dir=None, c
     ot_type = _get_obj_type(label)
 
     reason = _is_object_irregular(annotator, np_xyxy, ot_type, label, conf) 
-    if reason is not None and not get_control_flag("FLAG_LABEL_IRREGULAR"):
-        _log_save_dir(save_dir, "filter out irregular object {} {} reason: {}".format(label, np_xyxy, reason))
+    if reason is not None:
+        if not get_control_flag("FLAG_LABEL_IRREGULAR"): 
+             _log_save_dir(save_dir, "filter out irregular object {} {} reason: {}".format(label, np_xyxy, reason))
+             return
+        else:
+             _log_save_dir(save_dir, "keep irregular object {} {} reason: {}".format(label, np_xyxy, reason))
 
     reason = None
     if label is not None:
