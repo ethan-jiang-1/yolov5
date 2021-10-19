@@ -68,7 +68,7 @@ def _is_object_irregular(annotator, np_xyxy, ot_type, label, conf):
                 return "BorderBk({}/{}".format(dx, dy) 
             return "BorderNm({}/{})".format(dx, dy) 
 
-        if (dx * dy < 24 * 24):
+        if (dx * dy < 36 * 36):
             if ot_type == "OtBack":
                 return "AreaBk({}/{}/{}".format(dx, dy, dx * dy) 
             return "AreaNm({}/{}/{})".format(dx, dy, dx * dy)        
@@ -84,13 +84,13 @@ def _is_object_irregular(annotator, np_xyxy, ot_type, label, conf):
                 return "BorderHcBk({}/{}".format(dx, dy) 
             return "BorderHcNm({}/{})".format(dx, dy) 
 
-        if (dx * dy < 36 * 36):
+        if (dx * dy < 48 * 48):
             if ot_type == "OtBack":
                 return "AreaHcBk({}/{}/{}".format(dx, dy, dx * dy) 
             return "AreaHcNm({}/{}/{})".format(dx, dy, dx * dy)        
 
         hw_ratio = max(dx/dy, dy/dx) 
-        if (hw_ratio > 2):
+        if (hw_ratio > 3):
             if ot_type == "OtBack":
                 return "HwRatioHcBk({})".format(hw_ratio)
             return "HwRatioHcNm({})".format(hw_ratio)
