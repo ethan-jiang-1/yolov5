@@ -129,7 +129,9 @@ def annotator_box_label_exp(annotator, xyxy, label, color=None, save_dir=None, c
              _log_save_dir(save_dir, "filter out irregular object {} {} reason: {}".format(label, np_xyxy, reason))
              return
         else:
-             _log_save_dir(save_dir, "keep irregular object {} {} reason: {}".format(label, np_xyxy, reason))
+            if label is not None:
+                label = "* " + label
+            _log_save_dir(save_dir, "keep irregular object {} {} reason: {}".format(label, np_xyxy, reason))
 
     reason = None
     if label is not None:
