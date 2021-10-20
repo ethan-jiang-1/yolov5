@@ -19,6 +19,15 @@ s_control_params = {
     "PARAM_BL_IRR_LC": None
 }
 
+def dump_control_flags():
+    print("\nControl Flags")
+    for key, val in s_control_names.items():
+        print(key, "\t", val)
+    print("\nControl Params")
+    for key, val in s_control_params.items():
+        print(key, "\t", val)
+    print()
+
 def set_control_flag(control_name, enable_disable):
     global s_control_names
     if control_name in s_control_names:

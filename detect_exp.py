@@ -33,6 +33,7 @@ from utils.torch_utils import load_classifier, select_device, time_sync   # noqa
 from utils_exp.ue_apply_classifer import apply_classifier_exp, load_classifier_exp, has_classifier_enabled
 from utils_exp.ue_annotator_box_label import annotator_box_label_exp, has_object_tracking, track_detections_exp
 from utils_exp.ue_non_max_suppression import non_max_suppression_exp
+from utils_exp.ue_control import dump_control_flags
 
 
 @torch.no_grad()
@@ -79,9 +80,13 @@ def run(weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
     w = weights[0] if isinstance(weights, list) else weights
     classify, suffix, suffixes = False, Path(w).suffix.lower(), ['.pt', '.onnx', '.tflite', '.pb', '']
     # ethan add/modify 2
+    print(colorstr("blue", "hack control flags/params"))
+    dump_control_flags()
     if has_classifier_enabled():
         print(colorstr("blue", "2nd-stage classifier enabled"))
         classify, suffix = True, Path(w).suffix.lower()
+    if has_object_tracking():
+        print(colorstr("blue", "object tracking enabled"))
 
     check_suffix(w, suffixes)  # check weights have acceptable suffix
     pt, onnx, tflite, pb, saved_model = (suffix == x for x in suffixes)  # backend booleans
