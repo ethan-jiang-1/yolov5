@@ -22,12 +22,11 @@ def extend_sys_paths():
 extend_sys_paths()
 
 from detect_exp import parse_opt, main, ROOT 
-from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
-from utils_exp.ue_annotator_box_label import enable_object_tracking  # , enable_dump_track_imgs
 
+
+OD_MODEL_TYPE = "yolov5m"
 OD_2ND_CLASSIFIER = False
-OD_MODEL_TYPE = "s"
-OD_TRACKING_SAMPLE = True
+OD_TRACKING_SAMPLE = False
 
 OD_SOURCE_TYPE = "mp4"  # ,  "images_tracking" #"mp4"  # "webcam", "image", "mp4", "mp4jpg"
 
@@ -43,16 +42,16 @@ def _get_label_params():
     return cmd
 
 def _get_weight_pt():
-    if OD_MODEL_TYPE == "s":
-        #cmd = "--weights weights/yolov5s/run_sac60_r2_e650_model-best.pt "
-        cmd = "--weights weights/yolov5s/run_sac60_r2_e830_model-best.pt "
-    elif OD_MODEL_TYPE == "m":
-        #cmd = "--weights weights/yolov5m/run_mac60_r1_e360_model-last.pt "
-        cmd = "--weights weights/yolov5m/run_mac60_r2_e460_model-last.pt " 
-    elif OD_MODEL_TYPE == "l":
-        cmd = "--weights weights/yolov5l/run_lac60_r1_e310_model-best.pt "
+    if OD_MODEL_TYPE == "yolov5s":
+        weight = "weights/yolov5s/run_sac60_r2_e830_model-best.pt"
+    elif OD_MODEL_TYPE == "yolov5m":
+        weight = "weights/yolov5m/run_mac60_r2_e620_model-last.pt" 
+    elif OD_MODEL_TYPE == "yolov5l":
+        weight = "weights/yolov5l/run_lac60_r1_e310_model-best.pt"
     else:
         raise ValueError("not support")
+    cmd = "--weights {} ".format(weight)
+    print("weight selected: ", weight, " for ", OD_MODEL_TYPE)
     return cmd
 
 def _get_source():
@@ -113,17 +112,28 @@ def _prepare_env():
 
     _cleanup_output()
 
+def _setup_control_flags():
+    from utils_exp.ue_apply_classifer import enable_classifier, enable_dump_corp_imgs
+    from utils_exp.ue_annotator_box_label import enable_object_tracking  # , enable_dump_track_imgs
+    from utils_exp.ue_control import dump_control_flags
+
     if OD_2ND_CLASSIFIER:
         enable_classifier(True)
         enable_dump_corp_imgs(True)
-
-    if OD_SOURCE_TYPE in ["mp4", "mp4jpg", "images_tracking"]:
+    else:
+        enable_classifier(False)
+        enable_dump_corp_imgs(False)
+    
+    if OD_TRACKING_SAMPLE:
         enable_object_tracking(True)
-        #enable_dump_track_imgs(True)
+    else:
+        enable_object_tracking(False)
+    dump_control_flags()
+
 
 def do_detect_exp():
-
     _prepare_env()
+    _setup_control_flags()
     _makeup_argv()
 
     opt = parse_opt()

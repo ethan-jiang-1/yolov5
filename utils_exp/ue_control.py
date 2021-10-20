@@ -19,13 +19,24 @@ s_control_params = {
     "PARAM_BL_IRR_LC": None
 }
 
+def _get_pad(key):
+    if len(key) <= 8:
+        return "\t\t\t\t\t"
+    if len(key) <= 16:
+        return "\t\t\t\t"
+    if len(key) <= 24:
+        return "\t\t\t"
+    if len(key) <= 32:
+        return "\t\t"
+    return "\t"
+
 def dump_control_flags():
     print("\nControl Flags")
     for key, val in s_control_names.items():
-        print(key, "\t", val)
+        print("{}{}{}".format(key, _get_pad(key), val))
     print("\nControl Params")
     for key, val in s_control_params.items():
-        print(key, "\t", val)
+        print("{}{}{}".format(key, _get_pad(key), val))    
     print()
 
 def set_control_flag(control_name, enable_disable):
@@ -53,3 +64,7 @@ def get_control_param(control_name):
     if control_name in s_control_params:
         return s_control_params[control_name]
     raise ValueError("uknown Param: {}".format(control_name))
+
+
+if __name__ == "__main__":
+    dump_control_flags()
