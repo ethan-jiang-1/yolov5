@@ -67,7 +67,7 @@ def _get_irregular_params():
 
     hc_min_hw = 36
     hc_min_area = 24 * 24
-    hc_max_hw_ratio = 1.6
+    hc_max_hw_ratio = 2
 
     return conf_thres, lc_min_hw, lc_min_area, lc_max_hw_ratio, hc_min_hw, hc_min_area, hc_max_hw_ratio
 
